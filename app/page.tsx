@@ -1,65 +1,46 @@
-import Image from "next/image";
+import GamesList from "../app/games/page";
+import GameSearchBar from "../components/gameSearchBar";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+      <section className="panel relative z-20 rounded-[2rem] px-6 py-10 sm:px-10 sm:py-14">
+        <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top_right,rgba(223,191,122,0.2),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(127,183,201,0.12),transparent_24%)]" />
+
+        <div className="relative max-w-3xl">
+          <h1 className="font-display mt-4 text-5xl font-semibold leading-none text-[var(--foreground)] sm:text-6xl">
+            PlayerPG, la référence moderne du RPG
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--muted)] sm:text-lg">
+            Le but de ce projet est de créer une encyclopédie de jeux de rôle avec des fiches détaillées et des critiques
+            afin d&apos;aider les joueurs à en savoir plus sur ce genre magnifique.
+          </p>
+
+          <div className="mt-8">
+            <GameSearchBar />
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-0 mt-10">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--accent-cool)]">
+              Liste de jeux
+            </p>
+            <h2 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">
+              Chroniques RPG
+            </h2>
+          </div>
+          <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">
+            Une selection de jeux a parcourir.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="mt-6">
+          <GamesList />
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }

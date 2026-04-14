@@ -1,26 +1,97 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #07111f;
+  --background-deep: #040912;
+  --surface: rgba(12, 22, 36, 0.74);
+  --surface-strong: rgba(17, 29, 48, 0.92);
+  --line: rgba(228, 201, 146, 0.18);
+  --line-strong: rgba(228, 201, 146, 0.36);
+  --foreground: #f6eddc;
+  --muted: #c0b7a0;
+  --accent: #dfbf7a;
+  --accent-strong: #f0d39a;
+  --accent-cool: #7fb7c9;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  min-height: 100vh;
+  margin: 0;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(108, 146, 177, 0.18), transparent 28%),
+    radial-gradient(circle at 20% 18%, rgba(223, 191, 122, 0.16), transparent 22%),
+    linear-gradient(180deg, #0b1727 0%, #07101c 48%, #040912 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, black, transparent 88%);
+  opacity: 0.32;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(223, 191, 122, 0.28);
+  color: #fff7e7;
+}
+
+.font-display {
+  font-family: var(--font-display), serif;
+}
+
+.panel {
+  background: linear-gradient(180deg, rgba(18, 30, 47, 0.9), rgba(10, 18, 31, 0.88));
+  border: 1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 220, 0.05),
+    0 24px 80px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px);
+}
+
+.ornament-line {
+  position: relative;
+}
+
+.ornament-line::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 72px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  transform: translateY(-50%);
 }
