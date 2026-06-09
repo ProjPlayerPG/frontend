@@ -1,63 +1,37 @@
-'use client'
+import { Suspense } from 'react'
+import GamesCatalog, { GamesSearchParams } from '@/components/gamesCatalog'
+import { CatalogSkeleton } from '@/components/loadingSkeletons'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import GameCard from '../../components/gameCard'
-import { normalizeBaseUrl } from '@/lib/igdb'
-
-type Game = {
-  id: number
-  name: string
-  cover?: { url?: string }
-  genres?: { name: string }[]
-  first_release_date?: number
-}
-
-export default function GamesList() {
-  const [games, setGames] = useState<Game[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-
-  useEffect(() => {
-    const run = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
-        const res = await fetch(`${baseUrl}/api/games?limit=20`)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
-        const data = await res.json()
-        setGames(data)
-      } catch (e: unknown) {
-        if (e instanceof Error) {
-          setError(e.message)
-        } else {
-          setError('Failed to load games')
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    run()
-  }, [])
-
-  if (loading) {
-    return <p className="text-sm uppercase tracking-[0.28em] text-[var(--muted)]">Chargement du grimoire...</p>
-  }
-
-  if (error) {
-    return <p className="text-sm text-rose-300">Erreur : {error}</p>
-  }
+export default async function GamesPage({
+  searchParams,
+}: {
+  searchParams: Promise<GamesSearchParams>
+}) {
+  const resolvedSearchParams = await searchParams
 
   return (
-    <div className="grid gap-5">
-      {games.map((game) => (
-        <GameCard key={game.id} game={game} onDetails={(id) => router.push(`/games/${id}`)} />
-      ))}
-    </div>
+    <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+      <section className="relative z-0">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--accent-cool)]">
+              Liste de jeux
+            </p>
+            <h1 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">
+              Chroniques RPG
+            </h1>
+          </div>
+          <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">
+            Une selection de jeux a parcourir.
+          </p>
+        </div>
+
+        <div className="mt-6">
+          <Suspense fallback={<CatalogSkeleton />}>
+            <GamesCatalog searchParams={resolvedSearchParams} />
+          </Suspense>
+        </div>
+      </section>
+    </main>
   )
 }

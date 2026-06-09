@@ -62,7 +62,13 @@ export default async function GameDetails({
         <div className="absolute inset-0">
           {coverUrl ? (
             <>
-              <Image src={coverUrl} alt={game.name} fill className="object-cover opacity-28 blur-sm" />
+              <Image
+                src={coverUrl}
+                alt={game.name}
+                fill
+                sizes="100vw"
+                className="object-cover opacity-28 blur-sm"
+              />
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(4,9,18,0.78),rgba(7,17,31,0.92))]" />
             </>
           ) : (
@@ -76,7 +82,13 @@ export default async function GameDetails({
             <div className="relative overflow-hidden rounded-[1.7rem] border border-[var(--line-strong)] bg-black/20 shadow-[0_24px_80px_rgba(0,0,0,0.36)]">
               {coverUrl ? (
                 <div className="relative aspect-[3/4] w-full">
-                  <Image src={coverUrl} alt={game.name} fill className="object-cover" />
+                  <Image
+                    src={coverUrl}
+                    alt={game.name}
+                    fill
+                    sizes="(max-width: 1024px) min(20rem, calc(100vw - 4rem)), 320px"
+                    className="object-cover"
+                  />
                 </div>
               ) : (
                 <div className="flex aspect-[3/4] items-center justify-center text-sm uppercase tracking-[0.28em] text-[var(--muted)]">

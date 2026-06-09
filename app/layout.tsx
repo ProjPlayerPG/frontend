@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Space_Grotesk } from "next/font/google";
+import SiteHeader from "@/components/siteHeader";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -25,10 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" data-scroll-behavior="smooth">
       <body
         className={`${displayFont.variable} ${bodyFont.variable} antialiased`}
       >
+        <SiteHeader />
         {children}
       </body>
     </html>

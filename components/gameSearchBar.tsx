@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 
@@ -11,7 +11,7 @@ type SearchGame = {
   cover?: { url?: string }
 }
 
-export default function GameSearchBar() {
+export default function GameSearchBar({ compact = false }: { compact?: boolean }) {
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<SearchGame[]>([])
   const [loading, setLoading] = useState(false)
@@ -19,7 +19,16 @@ export default function GameSearchBar() {
   const [error, setError] = useState<string | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
+  const pathname = usePathname()
   const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
+
+  useEffect(() => {
+    setSearch('')
+    setResults([])
+    setOpen(false)
+    setError(null)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+  }, [pathname])
 
   useEffect(() => {
     const query = search.trim()
@@ -66,12 +75,12 @@ export default function GameSearchBar() {
   }, [search, baseUrl])
 
   return (
-    <div className="relative z-30">
-      <div className="panel relative rounded-[1.75rem] px-5 py-4 sm:px-6">
+    <div className={compact ? 'relative z-30 w-full min-w-0' : 'relative z-30'}>
+      <div className={`panel relative ${compact ? 'rounded-full px-4 py-2' : 'rounded-[1.75rem] px-5 py-4 sm:px-6'}`}>
         <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-[radial-gradient(circle_at_center,rgba(223,191,122,0.18),transparent_65%)]" />
 
-        <div className="relative flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[var(--line)] bg-white/5 text-[var(--accent)]">
+        <div className={`relative flex items-center ${compact ? 'gap-2' : 'gap-4'}`}>
+          <div className={`flex shrink-0 items-center justify-center border border-[var(--line)] bg-white/5 text-[var(--accent)] ${compact ? 'h-8 w-8 rounded-full' : 'h-12 w-12 rounded-2xl'}`}>
             <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]">
               <circle cx="11" cy="11" r="6" />
               <path d="m20 20-3.5-3.5" />
@@ -79,24 +88,24 @@ export default function GameSearchBar() {
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="font-display text-xs uppercase tracking-[0.32em] text-[var(--accent)]">
+            <p className={`font-display text-xs uppercase tracking-[0.32em] text-[var(--accent)] ${compact ? 'sr-only' : ''}`}>
               Rechercher un jeu
             </p>
             <input
-              className="mt-1 w-full bg-transparent text-lg text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]/85"
+              className={`w-full bg-transparent text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]/85 ${compact ? 'text-sm leading-8' : 'mt-1 text-lg'}`}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Titre..."
+              placeholder={compact ? 'Rechercher...' : 'Titre...'}
             />
           </div>
         </div>
       </div>
 
-      {loading ? <p className="mt-3 text-sm text-[var(--muted)]">Consultation du codex...</p> : null}
-      {error ? <p className="mt-3 text-sm text-rose-300">Erreur : {error}</p> : null}
+      {loading && !compact ? <p className="mt-3 text-sm text-[var(--muted)]">Consultation du codex...</p> : null}
+      {error && !compact ? <p className="mt-3 text-sm text-rose-300">Erreur : {error}</p> : null}
 
       {open ? (
-        <div className="panel absolute left-0 right-0 top-full z-40 mt-3 max-h-[28rem] overflow-y-auto rounded-[1.5rem] p-2 shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
+        <div className={`panel absolute top-full z-40 mt-3 max-h-[28rem] overflow-y-auto rounded-[1.5rem] p-2 shadow-[0_24px_80px_rgba(0,0,0,0.42)] ${compact ? 'right-0 w-[min(24rem,calc(100vw-2rem))]' : 'left-0 right-0'}`}>
           {results.length > 0 ? (
             results.map((game) => {
               const coverUrl = igdbUrlWithSize(game.cover?.url, 't_cover_big')
@@ -107,7 +116,8 @@ export default function GameSearchBar() {
                   type="button"
                   onClick={() => {
                     setOpen(false)
-                    setSearch(game.name)
+                    setSearch('')
+                    setResults([])
                     router.push(`/games/${game.id}`)
                   }}
                   className="flex w-full items-center gap-4 rounded-[1.1rem] px-3 py-3 text-left transition hover:bg-white/6"
@@ -133,7 +143,7 @@ export default function GameSearchBar() {
                       {game.name}
                     </p>
                     <p className="mt-2 text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">
-                      Voir les détails
+                      Voir les details
                     </p>
                   </div>
                 </button>

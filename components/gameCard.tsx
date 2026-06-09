@@ -1,7 +1,6 @@
-'use client'
-
 import { igdbUrlWithSize } from '@/lib/igdb'
 import Image from 'next/image'
+import Link from 'next/link'
 
 type Game = {
   id: number
@@ -16,21 +15,14 @@ function formatReleaseYear(timestamp?: number) {
   return new Date(timestamp * 1000).getFullYear()
 }
 
-export default function GameCard({
-  game,
-  onDetails,
-}: {
-  game: Game
-  onDetails: (id: number) => void
-}) {
+export default function GameCard({ game }: { game: Game }) {
   const coverUrl = igdbUrlWithSize(game.cover?.url, 't_cover_big')
   const releaseYear = formatReleaseYear(game.first_release_date)
   const genres = game.genres?.slice(0, 2).map((genre) => genre.name) ?? []
 
   return (
-    <button
-      type="button"
-      onClick={() => onDetails(game.id)}
+    <Link
+      href={`/games/${game.id}`}
       className="panel group flex w-full flex-col gap-5 overflow-hidden rounded-[1.75rem] p-4 text-left transition duration-300 hover:-translate-y-1 hover:border-[var(--line-strong)] sm:flex-row sm:items-center sm:p-5"
     >
       <div className="relative h-56 w-full overflow-hidden rounded-[1.35rem] border border-[var(--line)] bg-white/8 sm:h-36 sm:w-28 sm:shrink-0">
@@ -39,6 +31,7 @@ export default function GameCard({
             src={coverUrl}
             alt={game.name}
             fill
+            sizes="(max-width: 640px) calc(100vw - 2rem), 112px"
             className="object-cover transition duration-500 group-hover:scale-[1.03]"
           />
         ) : (
@@ -81,6 +74,6 @@ export default function GameCard({
           </svg>
         </span>
       </div>
-    </button>
+    </Link>
   )
 }
