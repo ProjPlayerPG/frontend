@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 import GameSearchBar from './gameSearchBar'
 
 const navItems = [
@@ -11,8 +12,49 @@ const navItems = [
   { href: '/personnages', label: 'Personnages' },
 ]
 
+const assistantItem = { href: '/chatbot', label: 'Conseiller RPG' }
+
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+
+    async function loadAvatar() {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userId = sessionData.session?.user.id
+
+      if (!userId) {
+        if (active) {
+          setAvatarUrl(null)
+        }
+        return
+      }
+
+      const { data } = await supabase.from('profiles').select('avatar_url').eq('user_id', userId).maybeSingle()
+
+      if (active) {
+        setAvatarUrl(data?.avatar_url ?? null)
+      }
+    }
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        setAvatarUrl(null)
+        return
+      }
+
+      loadAvatar()
+    })
+
+    loadAvatar()
+
+    return () => {
+      active = false
+      listener.subscription.unsubscribe()
+    }
+  }, [])
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[rgba(4,9,18,0.76)] backdrop-blur-xl">
@@ -38,15 +80,33 @@ export default function SiteHeader() {
         </div>
 
         <Link
+          href={assistantItem.href}
+          aria-label={assistantItem.label}
+          title={assistantItem.label}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--accent-strong)] bg-[var(--accent)] text-[var(--background-deep)] shadow-[0_12px_28px_rgba(223,191,122,0.26)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-strong)]"
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]">
+            <path d="M12 3l1.7 4.6L18 9.3l-4.3 1.7L12 16l-1.7-5L6 9.3l4.3-1.7L12 3z" />
+            <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z" />
+            <path d="M5 15l.7 1.8L7.5 17.5l-1.8.7L5 20l-.7-1.8-1.8-.7 1.8-.7L5 15z" />
+          </svg>
+        </Link>
+
+        <Link
           href="/profile"
           aria-label="Compte"
           title="Compte"
-          className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-white/6 text-[var(--accent)] transition hover:border-[var(--line-strong)] hover:bg-[var(--accent)]/12 lg:flex"
+          className="hidden h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--line)] bg-white/6 bg-cover bg-center text-[var(--accent)] transition hover:border-[var(--line-strong)] hover:bg-[var(--accent)]/12 lg:flex"
+          style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : undefined}
         >
-          <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4.5 20c1.4-4 4-6 7.5-6s6.1 2 7.5 6" />
-          </svg>
+          {avatarUrl ? (
+            <span className="sr-only">Compte</span>
+          ) : (
+            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4.5 20c1.4-4 4-6 7.5-6s6.1 2 7.5 6" />
+            </svg>
+          )}
         </Link>
 
         <button
@@ -76,7 +136,7 @@ export default function SiteHeader() {
       {menuOpen ? (
         <div className="mx-auto max-w-6xl px-5 pb-4 sm:px-8 lg:hidden">
           <nav className="panel grid gap-2 rounded-[1.25rem] p-3">
-            {[...navItems, { href: '/profile', label: 'Compte' }].map((item) => (
+            {[assistantItem, ...navItems, { href: '/profile', label: 'Compte' }].map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

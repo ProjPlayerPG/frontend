@@ -1,14 +1,36 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import FavoriteButton from '@/components/favoriteButton'
+import GameTranslationToggle from '@/components/gameTranslationToggle'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 
 type Game = {
   id: number
   name: string
   summary?: string
+  storyline?: string
   genres?: { id: number; name: string }[]
+  platforms?: { id: number; name: string }[]
+  involved_companies?: {
+    id: number
+    developer?: boolean
+    publisher?: boolean
+    company?: { id: number; name: string }
+  }[]
   cover?: { id?: number; url?: string }
   first_release_date?: number
+  parent_game?: {
+    id: number
+    name: string
+  }
+  dlcs?: RelatedGame[]
+  expansions?: RelatedGame[]
+}
+
+type RelatedGame = {
+  id: number
+  name: string
+  cover?: { id?: number; url?: string }
 }
 
 function formatReleaseDate(timestamp?: number) {
@@ -19,6 +41,16 @@ function formatReleaseDate(timestamp?: number) {
     month: 'long',
     year: 'numeric',
   }).format(new Date(timestamp * 1000))
+}
+
+function compactList(items: string[], fallback: string) {
+  if (!items.length) return fallback
+
+  if (items.length <= 3) {
+    return items.join(', ')
+  }
+
+  return `${items.slice(0, 3).join(', ')} +${items.length - 3}`
 }
 
 export default async function GameDetails({
@@ -44,11 +76,26 @@ export default async function GameDetails({
 
   const game: Game = await res.json()
   const coverUrl = igdbUrlWithSize(game.cover?.url, 't_1080p')
+  const favoriteCoverUrl = igdbUrlWithSize(game.cover?.url, 't_cover_big')
   const releaseDate = formatReleaseDate(game.first_release_date)
+  const platforms = game.platforms?.map((platform) => platform.name).filter(Boolean) ?? []
+  const studios =
+    game.involved_companies
+      ?.filter((entry) => entry.developer && entry.company?.name)
+      .map((entry) => entry.company?.name)
+      .filter((name): name is string => Boolean(name)) ?? []
+  const publishers =
+    game.involved_companies
+      ?.filter((entry) => entry.publisher && entry.company?.name)
+      .map((entry) => entry.company?.name)
+      .filter((name): name is string => Boolean(name)) ?? []
+  const relatedContent = [...(game.expansions ?? []), ...(game.dlcs ?? [])].filter(
+    (related, index, list) => related.id && list.findIndex((item) => item.id === related.id) === index,
+  )
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
-      <div className="mb-6">
+      <div className="mb-6 flex flex-wrap items-center gap-4">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.24em] text-[var(--accent-cool)] transition hover:text-[var(--foreground)]"
@@ -56,6 +103,15 @@ export default async function GameDetails({
           <span>←</span>
           Retour à la liste
         </Link>
+        {game.parent_game?.id ? (
+          <Link
+            href={`/games/${game.parent_game.id}`}
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-strong)] bg-[var(--accent)]/12 px-4 py-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--accent)] transition hover:border-[var(--accent)] hover:bg-[var(--accent)]/20 hover:text-[var(--foreground)]"
+          >
+            <span aria-hidden="true">{'<'}</span>
+            Jeu de base
+          </Link>
+        ) : null}
       </div>
 
       <section className="panel relative overflow-hidden rounded-[2rem]">
@@ -66,6 +122,7 @@ export default async function GameDetails({
                 src={coverUrl}
                 alt={game.name}
                 fill
+                priority
                 sizes="100vw"
                 className="object-cover opacity-28 blur-sm"
               />
@@ -117,25 +174,90 @@ export default async function GameDetails({
               ))}
             </div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
-                <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Statut</p>
-                <p className="font-display mt-2 text-2xl text-[var(--foreground)]">Legende repertoriee</p>
-              </div>
+            <FavoriteButton gameId={game.id} gameName={game.name} coverUrl={favoriteCoverUrl} />
+
+            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
                 <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Parution</p>
                 <p className="font-display mt-2 text-2xl text-[var(--foreground)]">
                   {releaseDate ?? 'Date inconnue'}
                 </p>
               </div>
+              <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
+                <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Plateformes</p>
+                <p className="mt-2 text-base font-medium leading-7 text-[var(--foreground)]">
+                  {compactList(platforms, 'Non renseignees')}
+                </p>
+              </div>
+              <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
+                <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Studio</p>
+                <p className="mt-2 text-base font-medium leading-7 text-[var(--foreground)]">
+                  {compactList(studios, 'Non renseigne')}
+                </p>
+              </div>
+              <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
+                <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Editeur</p>
+                <p className="mt-2 text-base font-medium leading-7 text-[var(--foreground)]">
+                  {compactList(publishers, 'Non renseigne')}
+                </p>
+              </div>
             </div>
 
-            <div className="mt-8 max-w-3xl">
-              <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Synopsis</p>
-              <p className="mt-3 text-base leading-8 text-[var(--muted)] sm:text-lg">
-                {game.summary ?? 'Aucun resume n est disponible pour cette fiche.'}
+            <GameTranslationToggle gameId={game.id} summary={game.summary} storyline={game.storyline} />
+
+            <div className="mt-8 max-w-3xl rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
+              <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Notes presse</p>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                Les notes presse seront ajoutees via des sources stables et officielles lorsque disponibles.
+                PlayerPG evite le scraping fragile pour garder des fiches fiables.
               </p>
             </div>
+
+            {relatedContent.length > 0 ? (
+              <div className="mt-8 max-w-3xl rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
+                <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">
+                  Extensions et contenus lies
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {relatedContent.slice(0, 6).map((related) => {
+                    const relatedCoverUrl = igdbUrlWithSize(related.cover?.url, 't_cover_big')
+
+                    return (
+                      <Link
+                        key={related.id}
+                        href={`/games/${related.id}`}
+                        className="flex items-center gap-3 rounded-[1rem] border border-[var(--line)] bg-white/5 p-3 transition hover:border-[var(--line-strong)] hover:bg-white/8"
+                      >
+                        <div className="flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[0.8rem] border border-[var(--line)] bg-black/18">
+                          {relatedCoverUrl ? (
+                            <Image
+                              src={relatedCoverUrl}
+                              alt={related.name}
+                              width={48}
+                              height={64}
+                              sizes="48px"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[0.55rem] uppercase tracking-[0.18em] text-[var(--muted)]">
+                              DLC
+                            </span>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-display truncate text-xl leading-none text-[var(--foreground)]">
+                            {related.name}
+                          </p>
+                          <p className="mt-2 text-xs uppercase tracking-[0.22em] text-[var(--accent-cool)]">
+                            Voir la fiche
+                          </p>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>

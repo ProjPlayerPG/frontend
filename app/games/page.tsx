@@ -22,7 +22,7 @@ export default async function GamesPage({
             </h1>
           </div>
           <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">
-            Une selection de jeux a parcourir.
+            Une sélection de jeux à parcourir.
           </p>
         </div>
 

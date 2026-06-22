@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import GamesCatalog, { GamesSearchParams } from "../components/gamesCatalog";
 import GamesSpotlight from "../components/gamesSpotlight";
 import { CatalogSkeleton, SpotlightSkeleton } from "../components/loadingSkeletons";
+import RandomRpgButton from "../components/randomRpgButton";
 
 export default async function Home({
   searchParams,
@@ -19,10 +20,6 @@ export default async function Home({
           <h1 className="font-display mt-2 text-4xl font-semibold leading-none text-[var(--foreground)] sm:text-5xl">
             PlayerPG, la reference moderne du RPG
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">
-            Le but de ce projet est de creer une encyclopedie de jeux de role avec des fiches detaillees et des critiques
-            afin d&apos;aider les joueurs a en savoir plus sur ce genre magnifique.
-          </p>
 
           <div className="mt-6 flex flex-wrap gap-4">
             <a
@@ -37,6 +34,7 @@ export default async function Home({
             >
               Explorer le catalogue
             </a>
+            <RandomRpgButton />
           </div>
         </div>
       </section>
@@ -52,7 +50,7 @@ export default async function Home({
             </h2>
           </div>
           <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">
-            Une selection automatique basee sur les sorties recentes de l&apos;API IGDB.
+            Une sélection automatique basée sur les sorties recentes.
           </p>
         </div>
 
@@ -74,7 +72,7 @@ export default async function Home({
             </h2>
           </div>
           <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">
-            Une selection de jeux a parcourir.
+            Une sélection de jeux à parcourir.
           </p>
         </div>
 
