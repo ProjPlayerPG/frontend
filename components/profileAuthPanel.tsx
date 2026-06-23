@@ -99,6 +99,7 @@ export default function ProfileAuthPanel() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [favorites, setFavorites] = useState<Favorite[]>([])
   const [loadingFavorites, setLoadingFavorites] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const currentUser = session?.user ?? null
   const isSignup = mode === 'signup'
@@ -187,6 +188,7 @@ export default function ProfileAuthPanel() {
       setNewPassword('')
       setDeleteConfirmation('')
       setFavorites([])
+      setIsAdmin(false)
       return
     }
 
@@ -223,6 +225,37 @@ export default function ProfileAuthPanel() {
     }
 
     loadFavorites()
+
+    return () => {
+      active = false
+    }
+  }, [currentUser])
+
+  useEffect(() => {
+    let active = true
+
+    async function loadAdminStatus() {
+      if (!currentUser) {
+        setIsAdmin(false)
+        return
+      }
+
+      const { data, error: adminError } = await supabase.rpc('is_admin')
+
+      if (!active) {
+        return
+      }
+
+      if (adminError) {
+        setIsAdmin(false)
+        setError(adminError.message)
+        return
+      }
+
+      setIsAdmin(Boolean(data))
+    }
+
+    loadAdminStatus()
 
     return () => {
       active = false
@@ -633,9 +666,16 @@ export default function ProfileAuthPanel() {
               </div>
 
               <div>
-                <h1 className="font-display text-5xl font-semibold leading-none text-[var(--foreground)]">
-                  {displayUsername}
-                </h1>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="font-display text-5xl font-semibold leading-none text-[var(--foreground)]">
+                    {displayUsername}
+                  </h1>
+                  {isAdmin ? (
+                    <span className="rounded-full border border-[var(--accent-strong)] bg-[var(--accent)]/14 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+                      Admin
+                    </span>
+                  ) : null}
+                </div>
                 <label className="mt-4 inline-flex cursor-pointer rounded-full border border-[var(--line-strong)] bg-white/6 px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:bg-[var(--accent)]/12">
                   {uploadingAvatar ? 'Envoi...' : 'Changer avatar'}
                   <input
@@ -682,6 +722,15 @@ export default function ProfileAuthPanel() {
             <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Membre depuis</p>
             <p className="mt-2 text-base text-[var(--foreground)]">{memberSince}</p>
           </div>
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              className="rounded-[1.4rem] border border-[var(--accent-strong)] bg-[var(--accent)]/12 p-5 transition hover:border-[var(--accent)] hover:bg-[var(--accent)]/20"
+            >
+              <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Administration</p>
+              <p className="font-display mt-2 text-2xl text-[var(--foreground)]">Ouvrir</p>
+            </Link>
+          ) : null}
         </div>
 
         <section className="mt-8 rounded-[1.5rem] border border-[var(--line)] bg-black/14 p-5">
