@@ -1,5 +1,5 @@
-import GameCard from '@/components/gameCard'
-import GamesCatalogControls, { GamesFilters, GamesPagination } from '@/components/gamesCatalogControls'
+import GameCard from '@/components/games/gameCard'
+import GamesCatalogControls, { GamesFilters, GamesPagination } from '@/components/games/gamesCatalogControls'
 import { platformFilters, releaseYearFilters, sortOptions, tagFilters } from '@/lib/gamesFilters'
 import { normalizeBaseUrl } from '@/lib/igdb'
 

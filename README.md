@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PlayerPG
 
-## Getting Started
+PlayerPG est une encyclopedie RPG moderne construite avec Next.js, Supabase et un service jeux dedie. Ce repo contient l'interface: catalogue, fiches, auth, favoris, admin, chatbot et integration avec les APIs serveur.
 
-First, run the development server:
+## Stack
+
+- Frontend: Next.js App Router, React, TypeScript, Tailwind CSS
+- Auth et donnees utilisateur: Supabase Auth, Postgres, Storage, RLS
+- Donnees jeux et IA: service externe `game_service`
+- Emails: Supabase Auth par defaut pour le moment, Brevo prevu avec domaine authentifie
+
+## Lancer le projet
+
+Depuis la racine globale `PlayerPG`, lancer le frontend:
+
+```bash
+cd frontend/frontend
+npm install
+npm run dev
+```
+
+Puis lancer le service jeux:
+
+```bash
+cd ../../game_service/game_service
+npm install
+npm run dev
+```
+
+Par defaut, le frontend tourne sur `http://localhost:3000`. Le service jeux doit etre reference par `NEXT_PUBLIC_GAME_SERVICE_URL` dans le `.env` du frontend.
+
+## Scripts utiles
+
+Frontend:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Service jeux:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev
+npm run start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Documentation frontend
 
-## Learn More
+- [Architecture](docs/architecture.md)
+- [Variables d'environnement](docs/env.md)
+- [Supabase](docs/supabase.md)
+- [Fonctionnalites](docs/features.md)
 
-To learn more about Next.js, take a look at the following resources:
+## Documentation services
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [game_service](../../game_service/game_service/README.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes importantes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Les cles secretes ne doivent jamais etre prefixees par `NEXT_PUBLIC_`.
+- `SUPABASE_SERVICE_ROLE_KEY` et `BREVO_API_KEY` doivent rester cote serveur.
+- Brevo SMTP fonctionne mieux avec un domaine authentifie. Les adresses Gmail/Outlook/Yahoo peuvent etre refusees ou considerees non conformes.

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import GameSearchBar from './gameSearchBar'
+import GameSearchBar from '@/components/games/gameSearchBar'
 
 const navItems = [
   { href: '/', label: 'Accueil' },

@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import FavoriteButton from '@/components/favoriteButton'
-import GameTranslationToggle from '@/components/gameTranslationToggle'
+import FavoriteButton from '@/components/games/favoriteButton'
+import GameTranslationToggle from '@/components/games/gameTranslationToggle'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 
 type Game = {

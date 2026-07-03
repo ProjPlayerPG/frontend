@@ -1,4 +1,4 @@
-import RpgChatbot from "@/components/rpgChatbot";
+import RpgChatbot from "@/components/chatbot/rpgChatbot";
 
 export default function ChatbotPage() {
   return (

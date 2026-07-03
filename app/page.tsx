@@ -1,8 +1,8 @@
 import { Suspense } from "react";
-import GamesCatalog, { GamesSearchParams } from "../components/gamesCatalog";
-import GamesSpotlight from "../components/gamesSpotlight";
-import { CatalogSkeleton, SpotlightSkeleton } from "../components/loadingSkeletons";
-import RandomRpgButton from "../components/randomRpgButton";
+import GamesCatalog, { GamesSearchParams } from "@/components/games/gamesCatalog";
+import GamesSpotlight from "@/components/games/gamesSpotlight";
+import RandomRpgButton from "@/components/games/randomRpgButton";
+import { CatalogSkeleton, SpotlightSkeleton } from "@/components/shared/loadingSkeletons";
 
 export default async function Home({
   searchParams,

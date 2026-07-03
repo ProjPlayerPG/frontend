@@ -1,4 +1,4 @@
-import ProfileAuthPanel from '@/components/profileAuthPanel'
+import ProfileAuthPanel from '@/components/profile/profileAuthPanel'
 
 export default function ProfilePage() {
   return (

@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
-import GamesCatalog, { GamesSearchParams } from '@/components/gamesCatalog'
-import { CatalogSkeleton } from '@/components/loadingSkeletons'
+import GamesCatalog, { GamesSearchParams } from '@/components/games/gamesCatalog'
+import { CatalogSkeleton } from '@/components/shared/loadingSkeletons'
 
 export default async function GamesPage({
   searchParams,
