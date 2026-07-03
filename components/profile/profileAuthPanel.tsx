@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import Link from 'next/link'
+import ProfileNotifications from '@/components/profile/profileNotifications'
 import { supabase } from '@/lib/supabaseClient'
 
 type AuthMode = 'signin' | 'signup' | 'forgot'
@@ -797,6 +798,8 @@ export default function ProfileAuthPanel() {
               : null}
           </div>
         </section>
+
+        <ProfileNotifications />
 
         <form onSubmit={handleProfileUpdate} className="mt-8 grid gap-5 rounded-[1.5rem] border border-[var(--line)] bg-black/14 p-5">
           <div>

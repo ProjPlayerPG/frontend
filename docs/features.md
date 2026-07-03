@@ -132,9 +132,21 @@ Objectif:
 
 - Liste des termes.
 - Detail type article/blog.
-- Jeux lies.
+- Jeux liés.
 - Formulaire de contribution.
+- Sources HTTPS obligatoires.
 - Contribution publiee directement si admin, sinon `pending`.
+
+Etat implemente:
+
+- La page `/glossaire` lit les entrees publiees depuis Supabase.
+- Les cartes menent vers `/glossaire/[slug]`.
+- Le formulaire est isole dans `/glossaire/proposer`.
+- Le formulaire cree une proposition via route serveur.
+- Les sources non HTTPS et les liens locaux/prives sont refuses.
+- L'admin voit les sources dans la moderation.
+- Les pages detaillees affichent le contributeur et ses autres publications.
+- Une notification profil est creee quand l'admin publie ou refuse une proposition.
 
 ## Personnages
 

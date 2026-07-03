@@ -104,6 +104,18 @@ export async function GET(request: Request) {
       return serverError(gamesError.message)
     }
 
+    const { data: sources, error: sourcesError } = entryIds.length
+      ? await admin
+          .from('glossary_entry_sources')
+          .select('id, glossary_entry_id, label, url')
+          .in('glossary_entry_id', entryIds)
+          .order('created_at', { ascending: true })
+      : { data: [], error: null }
+
+    if (sourcesError) {
+      return serverError(sourcesError.message)
+    }
+
     const { data: authors, error: authorsError } = authorIds.length
       ? await admin.from('profiles').select('user_id, username, email').in('user_id', authorIds)
       : { data: [], error: null }
@@ -116,6 +128,7 @@ export async function GET(request: Request) {
       profiles: profiles ?? [],
       pendingEntries: entries ?? [],
       entryGames: games ?? [],
+      entrySources: sources ?? [],
       authors: authors ?? [],
     })
   } catch (error) {
@@ -167,14 +180,36 @@ export async function PATCH(request: Request) {
           published_at: body.status === 'published' ? new Date().toISOString() : null,
         })
         .eq('id', body.entryId)
-        .select('id, status')
+        .select('id, slug, title, status, author_id')
         .single()
 
       if (error) {
         return serverError(error.message)
       }
 
-      return Response.json({ entry: data })
+      const notificationPayload =
+        body.status === 'published'
+          ? {
+              user_id: data.author_id,
+              type: 'glossary_published',
+              title: 'Publication acceptee',
+              message: `Ton entree "${data.title}" est maintenant visible dans le glossaire.`,
+              href: `/glossaire/${data.slug}`,
+            }
+          : {
+              user_id: data.author_id,
+              type: 'glossary_rejected',
+              title: 'Publication refusee',
+              message: `Ton entree "${data.title}" n'a pas ete publiee pour le moment.`,
+              href: '/glossaire/proposer',
+            }
+
+      const { error: notificationError } = await admin.from('notifications').insert(notificationPayload)
+
+      return Response.json({
+        entry: data,
+        notificationWarning: notificationError?.message ?? null,
+      })
     }
 
     return serverError('Action admin inconnue.', 400)

@@ -91,7 +91,7 @@ Usage:
 
 ### `glossary_entry_games`
 
-Jeux lies a une entree du glossaire.
+Jeux liés a une entree du glossaire.
 
 Colonnes principales:
 
@@ -106,6 +106,87 @@ Colonnes principales:
 Usage:
 
 - Jeux mis en avant dans une page de detail du glossaire.
+
+### `glossary_entry_sources`
+
+Sources justificatives liees a une entree du glossaire.
+
+Colonnes principales:
+
+- `id` uuid
+- `glossary_entry_id` uuid
+- `label` text, nullable
+- `url` text
+- `created_at` timestamptz
+
+Regles:
+
+- Une proposition doit avoir au moins une source.
+- Les URLs doivent utiliser `https://`.
+- Les liens sont affiches avec `target="_blank"` et `rel="noopener noreferrer nofollow"`.
+
+Usage:
+
+- Permettre a l'admin de verifier une proposition avant publication.
+- Rendre les pages detaillees du glossaire plus fiables.
+
+### `notifications`
+
+Notifications applicatives rattachees au profil utilisateur.
+
+Colonnes conseillees:
+
+- `id` uuid
+- `user_id` uuid
+- `type` text
+- `title` text
+- `message` text
+- `href` text, nullable
+- `read_at` timestamptz, nullable
+- `created_at` timestamptz
+
+Requete de creation:
+
+```sql
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(user_id) on delete cascade,
+  type text not null check (type in ('glossary_published', 'glossary_rejected')),
+  title text not null,
+  message text not null,
+  href text,
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists notifications_user_created_idx
+  on public.notifications(user_id, created_at desc);
+
+alter table public.notifications enable row level security;
+
+drop policy if exists "Users can read their own notifications" on public.notifications;
+create policy "Users can read their own notifications"
+on public.notifications
+for select
+to authenticated
+using (auth.uid() = user_id);
+
+drop policy if exists "Users can update their own notifications" on public.notifications;
+create policy "Users can update their own notifications"
+on public.notifications
+for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+grant select, insert, update, delete on public.notifications to service_role;
+grant select, update on public.notifications to authenticated;
+```
+
+Usage:
+
+- Notifier un contributeur quand une entree de glossaire est publiee ou refusee.
+- Afficher les notifications dans la page profil.
 
 ## Row Level Security
 

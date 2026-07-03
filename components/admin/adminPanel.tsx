@@ -34,6 +34,13 @@ type GlossaryEntryGame = {
   sort_order: number
 }
 
+type GlossaryEntrySource = {
+  id: string
+  glossary_entry_id: string
+  label: string | null
+  url: string
+}
+
 type Author = {
   user_id: string
   username: string
@@ -44,6 +51,7 @@ type AdminPayload = {
   profiles: Profile[]
   pendingEntries: GlossaryEntry[]
   entryGames: GlossaryEntryGame[]
+  entrySources: GlossaryEntrySource[]
   authors: Author[]
 }
 
@@ -59,6 +67,7 @@ export default function AdminPanel() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [pendingEntries, setPendingEntries] = useState<GlossaryEntry[]>([])
   const [entryGames, setEntryGames] = useState<GlossaryEntryGame[]>([])
+  const [entrySources, setEntrySources] = useState<GlossaryEntrySource[]>([])
   const [authors, setAuthors] = useState<Author[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState('')
@@ -81,6 +90,18 @@ export default function AdminPanel() {
 
     return map
   }, [entryGames])
+
+  const sourcesByEntryId = useMemo(() => {
+    const map = new Map<string, GlossaryEntrySource[]>()
+
+    for (const source of entrySources) {
+      const sources = map.get(source.glossary_entry_id) ?? []
+      sources.push(source)
+      map.set(source.glossary_entry_id, sources)
+    }
+
+    return map
+  }, [entrySources])
 
   async function adminFetch(options?: RequestInit) {
     const { data } = await supabase.auth.getSession()
@@ -117,6 +138,7 @@ export default function AdminPanel() {
       setProfiles(payload.profiles)
       setPendingEntries(payload.pendingEntries)
       setEntryGames(payload.entryGames)
+      setEntrySources(payload.entrySources)
       setAuthors(payload.authors)
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Impossible de charger l administration.')
@@ -241,6 +263,7 @@ export default function AdminPanel() {
           {pendingEntries.map((entry) => {
             const author = authorsById.get(entry.author_id)
             const games = gamesByEntryId.get(entry.id) ?? []
+            const sources = sourcesByEntryId.get(entry.id) ?? []
 
             return (
               <article key={entry.id} className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
@@ -264,6 +287,26 @@ export default function AdminPanel() {
                             {game.game_name}
                           </span>
                         ))}
+                      </div>
+                    ) : null}
+                    {sources.length ? (
+                      <div className="mt-4 grid gap-2">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+                          Sources
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {sources.map((source) => (
+                            <a
+                              key={source.id}
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer nofollow"
+                              className="rounded-full border border-[var(--line)] bg-white/6 px-3 py-2 text-xs text-[var(--muted)] transition hover:border-[var(--line-strong)] hover:text-[var(--foreground)]"
+                            >
+                              {source.label || source.url}
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     ) : null}
                   </div>
