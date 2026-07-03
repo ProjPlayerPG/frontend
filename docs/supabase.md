@@ -63,12 +63,12 @@ Colonnes principales:
 
 Usage:
 
-- Eviter de retraduire une fiche deja traitee.
+- Eviter de retraduire une fiche déjà traitée.
 - Limiter les couts IA.
 
 ### `glossary_entries`
 
-Propositions et entrees publiees du glossaire.
+Propositions et entrées publiées du glossaire.
 
 Colonnes principales:
 
@@ -195,13 +195,13 @@ RLS doit rester active sur les tables manipulees depuis le navigateur.
 Regle generale:
 
 - Les utilisateurs lisent/modifient uniquement leurs propres donnees.
-- Les entrees publiees sont lisibles publiquement.
-- Les admins peuvent lire/moderer les propositions.
+- Les entreés publiées sont lisibles publiquement.
+- Les admins peuvent lire/modérer les propositions.
 - Les routes serveur peuvent utiliser `SUPABASE_SERVICE_ROLE_KEY` pour les actions sensibles.
 
 ## Fonction `is_admin`
 
-La fonction `public.is_admin()` sert a verifier le role du user courant dans Supabase et le frontend.
+La fonction `public.is_admin()` sert a vérifier le role du user courant dans Supabase et le frontend.
 
 Principe:
 

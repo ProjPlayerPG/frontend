@@ -178,7 +178,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                       {author.username}
                     </span>
                     <span className="mt-1 block text-xs font-bold uppercase tracking-[0.16em] text-[var(--accent)]">
-                      Voir ses entrees
+                      Voir ses entrées
                     </span>
                   </span>
                 </Link>
@@ -186,7 +186,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                 {otherEntries.length ? (
                   <div className="mt-4 grid gap-2">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
-                      Autres entrees
+                      Autres entrées
                     </p>
                     {otherEntries.map((otherEntry) => (
                       <Link

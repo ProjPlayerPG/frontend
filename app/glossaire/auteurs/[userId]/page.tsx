@@ -104,7 +104,7 @@ export default async function GlossaryAuthorPage({ params }: PageProps) {
           Publications
         </p>
         <h2 className="font-display mt-2 text-4xl font-semibold text-[var(--foreground)]">
-          Entrees du glossaire
+          Entrées du glossaire
         </h2>
 
         {entries.length ? (

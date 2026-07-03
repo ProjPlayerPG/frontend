@@ -139,7 +139,7 @@ Objectif:
 
 Etat implemente:
 
-- La page `/glossaire` lit les entrees publiees depuis Supabase.
+- La page `/glossaire` lit les entrées publiees depuis Supabase.
 - Les cartes menent vers `/glossaire/[slug]`.
 - Le formulaire est isole dans `/glossaire/proposer`.
 - Le formulaire cree une proposition via route serveur.
