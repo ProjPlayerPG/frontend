@@ -1,34 +1,34 @@
 # Supabase
 
-Supabase est utilise comme backend headless pour l'authentification, les profils, les favoris, les avatars, les roles et certaines donnees collaboratives.
+Supabase est utilisé comme backend headless pour l'authentification, les profils, les favoris, les avatars, les rôles et certaines données collaboratives.
 
 ## Tables principales
 
 ### `profiles`
 
-Profil public et role applicatif de l'utilisateur.
+Profil public et rôle applicatif de l'utilisateur.
 
-Colonnes principales:
+Colonnes principales :
 
-- `user_id` uuid, cle primaire, rattache a `auth.users.id`
+- `user_id` uuid, clé primaire, rattachée à `auth.users.id`
 - `username` text, unique
 - `email` text, unique
 - `avatar_url` text, nullable
 - `created_at` timestamptz
 - `role` text, `user` ou `admin`
 
-Usage:
+Usage :
 
 - Affichage du profil.
 - Avatar dans le header.
-- Gestion des roles dans `/admin`.
-- Verification admin via `public.is_admin()`.
+- Gestion des rôles dans `/admin`.
+- Vérification admin via `public.is_admin()`.
 
 ### `favorites`
 
-Jeux sauvegardes par utilisateur.
+Jeux sauvegardés par utilisateur.
 
-Colonnes principales:
+Colonnes principales :
 
 - `id` uuid
 - `user_id` uuid
@@ -37,13 +37,13 @@ Colonnes principales:
 - `cover_url` text
 - `created_at` timestamptz
 
-Contrainte conseillee:
+Contrainte conseillée :
 
 ```sql
 unique (user_id, igdb_game_id)
 ```
 
-Usage:
+Usage :
 
 - Bouton favori sur les fiches.
 - Liste des favoris sur le profil.
@@ -53,7 +53,7 @@ Usage:
 
 Cache des traductions Mistral.
 
-Colonnes principales:
+Colonnes principales :
 
 - `igdb_game_id` int8
 - `summary_fr` text
@@ -61,39 +61,39 @@ Colonnes principales:
 - `created_at` timestamptz
 - `updated_at` timestamptz
 
-Usage:
+Usage :
 
-- Eviter de retraduire une fiche déjà traitée.
-- Limiter les couts IA.
+- Éviter de retraduire une fiche déjà traitée.
+- Limiter les coûts IA.
 
 ### `glossary_entries`
 
 Propositions et entrées publiées du glossaire.
 
-Colonnes principales:
+Colonnes principales :
 
 - `id` uuid
 - `slug` text, unique
 - `title` text
 - `short_description` text
 - `detailed_description` text
-- `status` text: `pending`, `published`, `rejected`
+- `status` text : `pending`, `published`, `rejected`
 - `author_id` uuid
 - `reviewed_by` uuid
 - `created_at` timestamptz
 - `updated_at` timestamptz
 - `published_at` timestamptz
 
-Usage:
+Usage :
 
-- Futur glossaire collaboratif.
-- Moderation admin.
+- Glossaire collaboratif.
+- Modération admin.
 
 ### `glossary_entry_games`
 
-Jeux liés a une entree du glossaire.
+Jeux liés à une entrée du glossaire.
 
-Colonnes principales:
+Colonnes principales :
 
 - `id` uuid
 - `glossary_entry_id` uuid
@@ -103,15 +103,15 @@ Colonnes principales:
 - `sort_order` int
 - `created_at` timestamptz
 
-Usage:
+Usage :
 
-- Jeux mis en avant dans une page de detail du glossaire.
+- Jeux mis en avant dans une page de détail du glossaire.
 
 ### `glossary_entry_sources`
 
-Sources justificatives liees a une entree du glossaire.
+Sources justificatives liées à une entrée du glossaire.
 
-Colonnes principales:
+Colonnes principales :
 
 - `id` uuid
 - `glossary_entry_id` uuid
@@ -119,22 +119,22 @@ Colonnes principales:
 - `url` text
 - `created_at` timestamptz
 
-Regles:
+Règles :
 
 - Une proposition doit avoir au moins une source.
-- Les URLs doivent utiliser `https://`.
-- Les liens sont affiches avec `target="_blank"` et `rel="noopener noreferrer nofollow"`.
+- Les URL doivent utiliser `https://`.
+- Les liens sont affichés avec `target="_blank"` et `rel="noopener noreferrer nofollow"`.
 
-Usage:
+Usage :
 
-- Permettre a l'admin de verifier une proposition avant publication.
-- Rendre les pages detaillees du glossaire plus fiables.
+- Permettre à l'admin de vérifier une proposition avant publication.
+- Rendre les pages détaillées du glossaire plus fiables.
 
 ### `notifications`
 
-Notifications applicatives rattachees au profil utilisateur.
+Notifications applicatives rattachées au profil utilisateur.
 
-Colonnes conseillees:
+Colonnes conseillées :
 
 - `id` uuid
 - `user_id` uuid
@@ -145,7 +145,7 @@ Colonnes conseillees:
 - `read_at` timestamptz, nullable
 - `created_at` timestamptz
 
-Requete de creation:
+Requête de création :
 
 ```sql
 create table if not exists public.notifications (
@@ -183,27 +183,27 @@ grant select, insert, update, delete on public.notifications to service_role;
 grant select, update on public.notifications to authenticated;
 ```
 
-Usage:
+Usage :
 
-- Notifier un contributeur quand une entree de glossaire est publiee ou refusee.
+- Notifier un contributeur quand une entrée de glossaire est publiée ou refusée.
 - Afficher les notifications dans la page profil.
 
 ## Row Level Security
 
-RLS doit rester active sur les tables manipulees depuis le navigateur.
+RLS doit rester active sur les tables manipulées depuis le navigateur.
 
-Regle generale:
+Règle générale :
 
-- Les utilisateurs lisent/modifient uniquement leurs propres donnees.
-- Les entreés publiées sont lisibles publiquement.
+- Les utilisateurs lisent/modifient uniquement leurs propres données.
+- Les entrées publiées sont lisibles publiquement.
 - Les admins peuvent lire/modérer les propositions.
 - Les routes serveur peuvent utiliser `SUPABASE_SERVICE_ROLE_KEY` pour les actions sensibles.
 
 ## Fonction `is_admin`
 
-La fonction `public.is_admin()` sert a vérifier le role du user courant dans Supabase et le frontend.
+La fonction `public.is_admin()` sert à vérifier le rôle du user courant dans Supabase et le frontend.
 
-Principe:
+Principe :
 
 ```sql
 select exists (
@@ -216,22 +216,22 @@ select exists (
 
 ## Storage
 
-Bucket: `avatars`
+Bucket : `avatars`
 
-Usage:
+Usage :
 
 - Upload de l'avatar utilisateur.
 - Affichage dans le profil et le header.
 - Suppression lors de la suppression du compte.
 
-Attention:
+Attention :
 
-- Les policies Storage doivent autoriser l'utilisateur a gerer son propre dossier.
-- Un bucket public facilite l'affichage des avatars, mais il faut eviter une policy trop large de listage global.
+- Les policies Storage doivent autoriser l'utilisateur à gérer son propre dossier.
+- Un bucket public facilite l'affichage des avatars, mais il faut éviter une policy trop large de listage global.
 
 ## Service role
 
-La service role key contourne RLS. Elle doit rester uniquement cote serveur:
+La service role key contourne RLS. Elle doit rester uniquement côté serveur :
 
 - `frontend/app/api/admin/route.ts`
 - `frontend/app/api/account/route.ts`

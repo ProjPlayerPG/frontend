@@ -1,17 +1,17 @@
 # PlayerPG
 
-PlayerPG est une encyclopedie RPG moderne construite avec Next.js, Supabase et un service jeux dedie. Ce repo contient l'interface: catalogue, fiches, auth, favoris, admin, chatbot et integration avec les APIs serveur.
+PlayerPG est une encyclopédie RPG moderne construite avec Next.js, Supabase et un service jeux dédié. Ce dépôt contient l'interface : catalogue, fiches, authentification, favoris, administration, chatbot et intégration avec les API serveur.
 
 ## Stack
 
-- Frontend: Next.js App Router, React, TypeScript, Tailwind CSS
-- Auth et donnees utilisateur: Supabase Auth, Postgres, Storage, RLS
-- Donnees jeux et IA: service externe `game_service`
-- Emails: Supabase Auth par defaut pour le moment, Brevo prevu avec domaine authentifie
+- Frontend : Next.js App Router, React, TypeScript, Tailwind CSS
+- Authentification et données utilisateur : Supabase Auth, Postgres, Storage, RLS
+- Données jeux et IA : service externe `game_service`
+- E-mails : Supabase Auth par défaut pour le moment, Brevo prévu avec un domaine authentifié
 
 ## Lancer le projet
 
-Depuis la racine globale `PlayerPG`, lancer le frontend:
+Depuis la racine globale `PlayerPG`, lancer le frontend :
 
 ```bash
 cd frontend/frontend
@@ -19,7 +19,7 @@ npm install
 npm run dev
 ```
 
-Puis lancer le service jeux:
+Puis lancer le service jeux :
 
 ```bash
 cd ../../game_service/game_service
@@ -27,11 +27,11 @@ npm install
 npm run dev
 ```
 
-Par defaut, le frontend tourne sur `http://localhost:3000`. Le service jeux doit etre reference par `NEXT_PUBLIC_GAME_SERVICE_URL` dans le `.env` du frontend.
+Par défaut, le frontend tourne sur `http://localhost:3000`. Le service jeux doit être référencé par `NEXT_PUBLIC_GAME_SERVICE_URL` dans le `.env` du frontend.
 
 ## Scripts utiles
 
-Frontend:
+Frontend :
 
 ```bash
 npm run dev
@@ -40,7 +40,7 @@ npm run build
 npm run start
 ```
 
-Service jeux:
+Service jeux :
 
 ```bash
 npm run dev
@@ -52,7 +52,7 @@ npm run start
 - [Architecture](docs/architecture.md)
 - [Variables d'environnement](docs/env.md)
 - [Supabase](docs/supabase.md)
-- [Fonctionnalites](docs/features.md)
+- [Fonctionnalités](docs/features.md)
 
 ## Documentation services
 
@@ -60,6 +60,6 @@ npm run start
 
 ## Notes importantes
 
-- Les cles secretes ne doivent jamais etre prefixees par `NEXT_PUBLIC_`.
-- `SUPABASE_SERVICE_ROLE_KEY` et `BREVO_API_KEY` doivent rester cote serveur.
-- Brevo SMTP fonctionne mieux avec un domaine authentifie. Les adresses Gmail/Outlook/Yahoo peuvent etre refusees ou considerees non conformes.
+- Les clés secrètes ne doivent jamais être préfixées par `NEXT_PUBLIC_`.
+- `SUPABASE_SERVICE_ROLE_KEY` et `BREVO_API_KEY` doivent rester côté serveur.
+- Brevo SMTP fonctionne mieux avec un domaine authentifié. Les adresses Gmail/Outlook/Yahoo peuvent être refusées ou considérées comme non conformes.

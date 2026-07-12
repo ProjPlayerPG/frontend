@@ -1,32 +1,32 @@
-# Fonctionnalites
+# Fonctionnalités
 
 ## Catalogue RPG
 
-Le catalogue affiche les jeux RPG issus d'IGDB avec:
+Le catalogue affiche les jeux RPG issus d'IGDB avec :
 
 - Pagination.
 - Filtre par tag.
 - Filtre par plateforme.
-- Filtre par annee.
-- Tri cumulable: alphabetique, date de sortie.
-- Etat des filtres dans l'URL.
+- Filtre par année.
+- Tri cumulable : alphabétique, date de sortie.
+- État des filtres dans l'URL.
 
-Les extensions et DLC sont exclus du catalogue pour eviter de polluer la navigation. Ils restent accessibles depuis la fiche du jeu de base.
+Les extensions et DLC sont exclus du catalogue pour éviter de polluer la navigation. Ils restent accessibles depuis la fiche du jeu de base.
 
 ## Recherche
 
-La recherche est placee dans le header.
+La recherche est placée dans le header.
 
-Caracteristiques:
+Caractéristiques :
 
 - Recherche client-side avec autocomplete.
 - Redirection vers la fiche jeu.
-- Nettoyage de la recherche apres navigation.
+- Nettoyage de la recherche après navigation.
 - Exclusion des extensions/DLC et contenus adultes.
 
 ## Fiche jeu
 
-Chaque fiche affiche:
+Chaque fiche affiche :
 
 - Image de couverture ou artwork.
 - Titre.
@@ -34,60 +34,60 @@ Chaque fiche affiche:
 - Date de parution.
 - Plateformes.
 - Studio.
-- Editeur.
+- Éditeur.
 - Synopsis.
 - Storyline si disponible.
-- Traduction Francais / Original.
+- Traduction Français / Original.
 - Bouton favori.
-- Extensions et contenus lies si le jeu en possede.
-- Lien retour vers le jeu de base si la fiche consultee est une extension.
-- Section "Notes presse" preparee pour une future integration fiable.
+- Extensions et contenus liés si le jeu en possède.
+- Lien retour vers le jeu de base si la fiche consultée est une extension.
+- Section "Notes presse" préparée pour une future intégration fiable.
 
 ## Traduction IA
 
-La traduction utilise Mistral via le `game_service`. Le frontend affiche le toggle Original / Francais et appelle l'endpoint serveur.
+La traduction utilise Mistral via le `game_service`. Le frontend affiche le toggle Original / Français et appelle l'endpoint serveur.
 
-Regles:
+Règles :
 
 - Traduction uniquement du `summary` et de la `storyline`.
-- Pas de traduction des titres, noms propres, genres, plateformes, studios ou editeurs.
-- Traduction a la demande.
+- Pas de traduction des titres, noms propres, genres, plateformes, studios ou éditeurs.
+- Traduction à la demande.
 - Cache Supabase dans `game_translations`.
 - Fallback propre si Mistral ou Supabase est indisponible.
 
 ## Chatbot RPG
 
-Le chatbot est sur une page dediee: `/chatbot`.
+Le chatbot est sur une page dédiée : `/chatbot`.
 
-Objectif:
+Objectif :
 
-- Recommander 3 a 5 RPG selon la demande utilisateur.
+- Recommander 3 à 5 RPG selon la demande utilisateur.
 - Envoyer la demande au `game_service`.
-- Eviter de recommander les jeux deja en favoris.
-- Exclure les contenus adultes/erotiques.
+- Éviter de recommander les jeux déjà en favoris.
+- Exclure les contenus adultes.
 
-## Decouverte aleatoire
+## Découverte aléatoire
 
-Le bouton "Decouvrir un RPG" redirige vers une fiche RPG aleatoire.
+Le bouton "Découvrir un RPG" redirige vers une fiche RPG aléatoire.
 
-Les contraintes de selection sont gerees cote `game_service`.
+Les contraintes de sélection sont gérées côté `game_service`.
 
 ## Authentification
 
-Supabase Auth gere:
+Supabase Auth gère :
 
 - Inscription.
 - Connexion.
-- Deconnexion.
-- Mot de passe oublie.
+- Déconnexion.
+- Mot de passe oublié.
 - Modification du compte.
 - Suppression du compte.
 
-Supabase gere aussi le hash du mot de passe.
+Supabase gère aussi le hash du mot de passe.
 
 ## Profil
 
-La page profil permet:
+La page profil permet de :
 
 - Voir le pseudo.
 - Voir l'avatar.
@@ -96,84 +96,84 @@ La page profil permet:
 - Supprimer le compte.
 - Voir les favoris.
 - Retirer un favori.
-- Acceder a l'admin si le role est `admin`.
+- Accéder à l'admin si le rôle est `admin`.
 
 ## Favoris
 
-Les utilisateurs connectes peuvent ajouter ou retirer un jeu de leurs favoris.
+Les utilisateurs connectés peuvent ajouter ou retirer un jeu de leurs favoris.
 
-La table `favorites` est protegee par RLS et une contrainte unique evite les doublons par utilisateur.
+La table `favorites` est protégée par RLS et une contrainte unique évite les doublons par utilisateur.
 
 ## Admin
 
-La page `/admin` permet:
+La page `/admin` permet de :
 
 - Voir les propositions de glossaire en attente.
 - Publier ou rejeter une proposition.
 - Voir les utilisateurs.
 - Promouvoir un utilisateur en admin.
-- Retrograder un admin en utilisateur.
+- Rétrograder un admin en utilisateur.
 
-Protection:
+Protection :
 
-- Verification de session Supabase.
-- Verification du role `admin`.
+- Vérification de session Supabase.
+- Vérification du rôle `admin`.
 - Actions sensibles via route serveur.
 
 ## Glossaire
 
-Etat actuel:
+État actuel :
 
-- Page statique avec cartes cliquables prevues.
-- Tables Supabase pretes pour un futur glossaire collaboratif.
-- Moderation deja presente cote admin.
+- Page avec cartes cliquables.
+- Tables Supabase prêtes pour le glossaire collaboratif.
+- Modération déjà présente côté admin.
 
-Objectif:
+Objectif :
 
 - Liste des termes.
-- Detail type article/blog.
+- Détail type article/blog.
 - Jeux liés.
 - Formulaire de contribution.
 - Sources HTTPS obligatoires.
-- Contribution publiee directement si admin, sinon `pending`.
+- Contribution publiée directement si admin, sinon `pending`.
 
-Etat implemente:
+État implémenté :
 
-- La page `/glossaire` lit les entrées publiees depuis Supabase.
-- Les cartes menent vers `/glossaire/[slug]`.
-- Le formulaire est isole dans `/glossaire/proposer`.
-- Le formulaire cree une proposition via route serveur.
-- Les sources non HTTPS et les liens locaux/prives sont refuses.
-- L'admin voit les sources dans la moderation.
-- Les pages detaillees affichent le contributeur et ses autres publications.
-- Une notification profil est creee quand l'admin publie ou refuse une proposition.
+- La page `/glossaire` lit les entrées publiées depuis Supabase.
+- Les cartes mènent vers `/glossaire/[slug]`.
+- Le formulaire est isolé dans `/glossaire/proposer`.
+- Le formulaire crée une proposition via route serveur.
+- Les sources non HTTPS et les liens locaux/privés sont refusés.
+- L'admin voit les sources dans la modération.
+- Les pages détaillées affichent le contributeur et ses autres publications.
+- Une notification profil est créée quand l'admin publie ou refuse une proposition.
 
 ## Personnages
 
-Etat actuel:
+État actuel :
 
 - Page statique.
 
-Objectif:
+Objectif :
 
 - Reprendre la logique collaborative du glossaire.
-- Fiches personnages/archetypes.
-- Moderation admin.
+- Fiches personnages/archétypes.
+- Modération admin.
 - Contributions utilisateur.
 
 ## Brevo
 
-Etat actuel:
+État actuel :
 
-- Brevo SMTP teste.
-- Les adresses freemail comme Gmail sont considerees non conformes pour l'envoi fiable.
-- Supabase Auth reste sur l'envoi email par defaut.
+- Brevo SMTP testé.
+- Les adresses freemail comme Gmail sont considérées comme non conformes pour l'envoi fiable.
+- Supabase Auth reste sur l'envoi d'e-mail par défaut.
 
-Objectif:
+Objectif :
 
 - Utiliser Brevo API pour les notifications applicatives.
-- Migrer SMTP vers Brevo quand un domaine PlayerPG est authentifie.
+- Migrer SMTP vers Brevo quand un domaine PlayerPG est authentifié.
 
-## Details backend
+## Détails backend
 
-Les comportements propres aux donnees IGDB, au cache, a Mistral et aux recommandations sont documentes dans la [documentation game_service](../../../game_service/game_service/README.md).
+Les comportements propres aux données IGDB, au cache, à Mistral et aux recommandations sont documentés dans la [documentation game_service](../../../game_service/game_service/README.md).
