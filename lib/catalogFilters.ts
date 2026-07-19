@@ -2,6 +2,7 @@ import { platformFilters, releaseYearFilters, sortOptions, tagFilters } from '@/
 
 export type GamesFilters = {
   page: number
+  query: string
   tag: string
   platform: string
   releaseYear: string
@@ -31,9 +32,24 @@ function pageFromSearchParams(value: SearchParamValue) {
   return Number.isInteger(page) && page > 0 ? page - 1 : 0
 }
 
+export function normalizeGameSearchQuery(value: SearchParamValue | string = '') {
+  return String(firstValue(value) ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .slice(0, 100)
+}
+
+export function gameSearchHref(value: SearchParamValue | string) {
+  const query = normalizeGameSearchQuery(value)
+  return query.length >= 2 ? `/games?q=${encodeURIComponent(query)}` : '/games'
+}
+
 export function filtersFromSearchParams(searchParams: GamesSearchParams = {}): GamesFilters {
+  const query = normalizeGameSearchQuery(searchParams.q)
+
   return {
     page: pageFromSearchParams(searchParams.page),
+    query: query.length >= 2 ? query : '',
     tag: allowedValue(searchParams.tag, tagFilters),
     platform: allowedValue(searchParams.platform, platformFilters),
     releaseYear: allowedValue(searchParams.releaseYear, releaseYearFilters),

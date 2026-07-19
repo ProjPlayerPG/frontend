@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import type { FormEvent } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { gameSearchHref, normalizeGameSearchQuery } from '@/lib/catalogFilters'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 
 type SearchGame = {
@@ -11,7 +13,13 @@ type SearchGame = {
   cover?: { url?: string }
 }
 
-export default function GameSearchBar({ compact = false }: { compact?: boolean }) {
+export default function GameSearchBar({
+  compact = false,
+  initialQuery = '',
+}: {
+  compact?: boolean
+  initialQuery?: string
+}) {
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<SearchGame[]>([])
   const [loading, setLoading] = useState(false)
@@ -23,12 +31,12 @@ export default function GameSearchBar({ compact = false }: { compact?: boolean }
   const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
 
   useEffect(() => {
-    setSearch('')
+    setSearch(pathname === '/games' ? normalizeGameSearchQuery(initialQuery) : '')
     setResults([])
     setOpen(false)
     setError(null)
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
-  }, [pathname])
+  }, [pathname, initialQuery])
 
   useEffect(() => {
     const query = search.trim()
@@ -74,18 +82,48 @@ export default function GameSearchBar({ compact = false }: { compact?: boolean }
     }
   }, [search, baseUrl])
 
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const query = normalizeGameSearchQuery(search)
+
+    if (!query) {
+      setOpen(false)
+      setResults([])
+      setError(null)
+      router.push('/games')
+      return
+    }
+
+    if (query.length < 2) {
+      setOpen(false)
+      setResults([])
+      setError('Saisis au moins 2 caractères.')
+      return
+    }
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setOpen(false)
+    setResults([])
+    setError(null)
+    router.push(gameSearchHref(query))
+  }
+
   return (
     <div className={compact ? 'relative z-30 w-full min-w-0' : 'relative z-30'}>
       <div className={`panel relative ${compact ? 'rounded-full px-4 py-2' : 'rounded-[1.75rem] px-5 py-4 sm:px-6'}`}>
         <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-[radial-gradient(circle_at_center,rgba(223,191,122,0.18),transparent_65%)]" />
 
-        <div className={`relative flex items-center ${compact ? 'gap-2' : 'gap-4'}`}>
-          <div className={`flex shrink-0 items-center justify-center border border-[var(--line)] bg-white/5 text-[var(--accent)] ${compact ? 'h-8 w-8 rounded-full' : 'h-12 w-12 rounded-2xl'}`}>
+        <form onSubmit={submitSearch} className={`relative flex items-center ${compact ? 'gap-2' : 'gap-4'}`}>
+          <button
+            type="submit"
+            aria-label="Afficher tous les résultats"
+            className={`flex shrink-0 items-center justify-center border border-[var(--line)] bg-white/5 text-[var(--accent)] transition hover:border-[var(--line-strong)] hover:bg-white/8 ${compact ? 'h-8 w-8 rounded-full' : 'h-12 w-12 rounded-2xl'}`}
+          >
             <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]">
               <circle cx="11" cy="11" r="6" />
               <path d="m20 20-3.5-3.5" />
             </svg>
-          </div>
+          </button>
 
           <div className="min-w-0 flex-1">
             <p className={`font-display text-xs uppercase tracking-[0.32em] text-[var(--accent)] ${compact ? 'sr-only' : ''}`}>
@@ -95,10 +133,12 @@ export default function GameSearchBar({ compact = false }: { compact?: boolean }
               className={`w-full bg-transparent text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]/85 ${compact ? 'text-sm leading-8' : 'mt-1 text-lg'}`}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
+              aria-label="Rechercher un jeu"
+              autoComplete="off"
               placeholder={compact ? 'Rechercher...' : 'Titre...'}
             />
           </div>
-        </div>
+        </form>
       </div>
 
       {loading && !compact ? <p className="mt-3 text-sm text-[var(--muted)]">Consultation du codex...</p> : null}

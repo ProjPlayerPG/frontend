@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import GameSearchBar from '@/components/games/gameSearchBar'
+import NotificationBell from '@/components/notifications/notificationBell'
 
 const navItems = [
   { href: '/', label: 'Accueil' },
@@ -12,7 +13,7 @@ const navItems = [
   { href: '/personnages', label: 'Personnages' },
 ]
 
-const assistantItem = { href: '/chatbot', label: 'Conseiller RPG' }
+const assistantItem = { href: '/chatbot', label: 'Guide RPG' }
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -91,6 +92,8 @@ export default function SiteHeader() {
             <path d="M5 15l.7 1.8L7.5 17.5l-1.8.7L5 20l-.7-1.8-1.8-.7 1.8-.7L5 15z" />
           </svg>
         </Link>
+
+        <NotificationBell />
 
         <Link
           href="/profile"

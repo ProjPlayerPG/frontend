@@ -30,6 +30,10 @@ begin
     raise exception 'service_role doit pouvoir supprimer un profil via la route serveur';
   end if;
 
+  if not has_table_privilege('authenticated', 'public.notifications', 'DELETE') then
+    raise exception 'authenticated doit pouvoir supprimer ses propres notifications';
+  end if;
+
   if has_schema_privilege('authenticated', 'public', 'CREATE') then
     raise exception 'authenticated ne doit pas créer d’objets dans public';
   end if;
@@ -56,8 +60,8 @@ begin
       'notifications'
     );
 
-  if public_policy_count <> 11 then
-    raise exception '11 policies publiques attendues, % trouvées', public_policy_count;
+  if public_policy_count <> 12 then
+    raise exception '12 policies publiques attendues, % trouvées', public_policy_count;
   end if;
 
   if exists (

@@ -246,6 +246,7 @@ using (
 revoke all on public.notifications from anon, authenticated;
 grant select on public.notifications to authenticated;
 grant update (read_at) on public.notifications to authenticated;
+grant delete on public.notifications to authenticated;
 grant all on public.notifications to service_role;
 
 drop policy if exists notifications_select_own on public.notifications;
@@ -258,6 +259,11 @@ create policy notifications_update_own
 on public.notifications for update to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+drop policy if exists notifications_delete_own on public.notifications;
+create policy notifications_delete_own
+on public.notifications for delete to authenticated
+using (auth.uid() = user_id);
 
 -- ---------------------------------------------------------------------------
 -- Storage : bucket public, écriture limitée au dossier de l'utilisateur

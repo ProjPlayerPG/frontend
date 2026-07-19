@@ -114,7 +114,7 @@ Notifications générées après modération du glossaire.
 | `read_at` | `timestamptz` | nullable, renseigné à la lecture |
 | `created_at` | `timestamptz` | `now()` |
 
-L'utilisateur lit uniquement ses notifications et peut seulement mettre à jour `read_at`. La création est réservée à la route admin avec la service role key.
+L'utilisateur peut lire ses notifications, mettre à jour uniquement `read_at` et supprimer uniquement ses propres notifications. La création reste réservée à la route admin avec la service role key.
 
 ## RLS et service role
 

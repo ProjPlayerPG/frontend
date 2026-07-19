@@ -185,7 +185,7 @@ export function GamesPagination({
           disabled={!canGoBack}
           className="flex h-11 flex-1 items-center justify-center rounded-full border border-[var(--line)] px-4 text-sm uppercase tracking-[0.18em] text-[var(--accent-cool)] transition hover:bg-white/7 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
         >
-          Precedent
+          Précédent
         </button>
         <button
           type="button"

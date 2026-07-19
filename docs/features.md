@@ -4,7 +4,8 @@
 
 Le catalogue affiche les jeux RPG issus d'IGDB avec :
 
-- Pagination.
+- Page dédiée `/games`.
+- Pagination de 12 jeux par page.
 - Filtre par tag.
 - Filtre par plateforme.
 - Filtre par année.
@@ -15,14 +16,25 @@ Les extensions et DLC sont exclus du catalogue pour éviter de polluer la naviga
 
 ## Recherche
 
-La recherche est placée dans le header.
+La recherche est disponible dans le header et sur la page `/games`.
 
 Caractéristiques :
 
-- Recherche client-side avec autocomplete.
-- Redirection vers la fiche jeu.
-- Nettoyage de la recherche après navigation.
+- Autocomplétion à partir de 2 caractères.
+- Validation avec la touche Entrée ou le bouton de recherche.
+- Redirection vers `/games?q=...` et affichage des résultats paginés.
+- Redirection directe vers la fiche d'un jeu depuis l'autocomplétion.
+- Conservation de la recherche et de la page courante dans l'URL.
 - Exclusion des extensions/DLC et contenus adultes.
+
+## Accueil
+
+L'accueil présente une synthèse des principaux contenus de PlayerPG sans dupliquer le catalogue :
+
+- Nouvelles sorties RPG.
+- Quatre dernières entrées publiées dans le glossaire.
+- Accès directs au catalogue, au glossaire, aux personnages et au guide PlayerPG.
+- Découverte aléatoire d'un RPG.
 
 ## Fiche jeu
 
@@ -96,8 +108,20 @@ La page profil permet de :
 - Supprimer le compte.
 - Voir les favoris.
 - Retirer un favori.
-- Consulter les notifications de modération et les marquer comme lues.
+- Accéder au centre de notifications.
 - Accéder à l'admin si le rôle est `admin`.
+
+## Notifications
+
+Les utilisateurs connectés disposent de :
+
+- Une cloche dans le header avec le nombre de notifications non lues.
+- Un aperçu des cinq dernières notifications.
+- Une page dédiée `/notifications`.
+- Des actions pour marquer une notification ou toutes les notifications comme lues.
+- Des actions pour supprimer une notification ou toutes les notifications.
+
+Les notifications concernent actuellement la publication ou le refus d'une proposition de glossaire. Les règles RLS garantissent qu'un utilisateur peut uniquement consulter, acquitter et supprimer ses propres notifications.
 
 ## Favoris
 

@@ -62,7 +62,7 @@ export default function RpgChatbot() {
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--accent-cool)]">
-            Conseiller RPG
+            Guide RPG
           </p>
           <h2 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">
             Trouver ta prochaine aventure

@@ -57,3 +57,18 @@ export function CatalogSkeleton() {
     </div>
   )
 }
+
+export function GlossarySkeleton() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {Array.from({ length: 4 }, (_, index) => (
+        <div key={index} className="panel min-h-52 rounded-[1.5rem] p-6">
+          <div className="h-8 w-2/3 rounded-full bg-white/8" />
+          <div className="mt-6 h-3 w-full rounded-full bg-white/8" />
+          <div className="mt-3 h-3 w-5/6 rounded-full bg-white/8" />
+          <div className="mt-3 h-3 w-2/3 rounded-full bg-white/8" />
+        </div>
+      ))}
+    </div>
+  )
+}
