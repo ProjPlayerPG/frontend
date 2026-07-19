@@ -96,6 +96,7 @@ La page profil permet de :
 - Supprimer le compte.
 - Voir les favoris.
 - Retirer un favori.
+- Consulter les notifications de modération et les marquer comme lues.
 - Accéder à l'admin si le rôle est `admin`.
 
 ## Favoris
@@ -122,21 +123,6 @@ Protection :
 
 ## Glossaire
 
-État actuel :
-
-- Page avec cartes cliquables.
-- Tables Supabase prêtes pour le glossaire collaboratif.
-- Modération déjà présente côté admin.
-
-Objectif :
-
-- Liste des termes.
-- Détail type article/blog.
-- Jeux liés.
-- Formulaire de contribution.
-- Sources HTTPS obligatoires.
-- Contribution publiée directement si admin, sinon `pending`.
-
 État implémenté :
 
 - La page `/glossaire` lit les entrées publiées depuis Supabase.
@@ -147,6 +133,8 @@ Objectif :
 - L'admin voit les sources dans la modération.
 - Les pages détaillées affichent le contributeur et ses autres publications.
 - Une notification profil est créée quand l'admin publie ou refuse une proposition.
+
+Les contributions d'un utilisateur standard sont placées en `pending`. Celles d'un admin sont publiées immédiatement. Le détail des tables et policies est disponible dans la [documentation Supabase](supabase.md).
 
 ## Personnages
 

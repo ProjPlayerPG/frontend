@@ -1,240 +1,167 @@
 # Supabase
 
-Supabase est utilisé comme backend headless pour l'authentification, les profils, les favoris, les avatars, les rôles et certaines données collaboratives.
+Supabase est le backend headless de PlayerPG pour l'authentification, les profils, les favoris, les rôles, le cache des traductions, le glossaire, les notifications et les avatars.
 
-## Tables principales
+Pour reproduire la base sur un projet neuf, exécuter [`supabase-setup.sql`](supabase-setup.sql) dans le SQL Editor. Le parcours complet est détaillé dans le [guide d'installation](installation.md).
+
+La Data API doit être active pour le schéma `public`. L'exposition automatique des nouvelles tables peut rester désactivée : le script attribue explicitement chaque privilège.
+
+## Modèle de données
 
 ### `profiles`
 
-Profil public et rôle applicatif de l'utilisateur.
+Profil applicatif lié à `auth.users`.
 
-Colonnes principales :
+| Colonne | Type | Règle |
+| --- | --- | --- |
+| `user_id` | `uuid` | clé primaire, FK vers `auth.users.id`, `ON DELETE CASCADE` |
+| `username` | `text` | obligatoire, unique |
+| `email` | `text` | obligatoire, unique |
+| `avatar_url` | `text` | nullable |
+| `created_at` | `timestamptz` | `now()` |
+| `role` | `text` | `user` par défaut, ou `admin` |
 
-- `user_id` uuid, clé primaire, rattachée à `auth.users.id`
-- `username` text, unique
-- `email` text, unique
-- `avatar_url` text, nullable
-- `created_at` timestamptz
-- `role` text, `user` ou `admin`
+Le profil est créé par le frontend après l'obtention d'une session Supabase. La suppression du compte Auth supprime ensuite le profil et ses données dépendantes grâce aux clés étrangères.
 
-Usage :
-
-- Affichage du profil.
-- Avatar dans le header.
-- Gestion des rôles dans `/admin`.
-- Vérification admin via `public.is_admin()`.
+Sécurité : un utilisateur peut lire son profil et modifier uniquement `username`, `email` et `avatar_url`. La colonne `role` n'est pas accordée en écriture au rôle `authenticated`, ce qui empêche une auto-promotion par appel REST.
 
 ### `favorites`
 
 Jeux sauvegardés par utilisateur.
 
-Colonnes principales :
+| Colonne | Type | Règle |
+| --- | --- | --- |
+| `id` | `uuid` | clé primaire, `gen_random_uuid()` |
+| `user_id` | `uuid` | FK vers `profiles.user_id`, `ON DELETE CASCADE` |
+| `igdb_game_id` | `bigint` | identifiant IGDB |
+| `game_name` | `text` | nom affiché |
+| `cover_url` | `text` | nullable |
+| `created_at` | `timestamptz` | `now()` |
 
-- `id` uuid
-- `user_id` uuid
-- `igdb_game_id` int8
-- `game_name` text
-- `cover_url` text
-- `created_at` timestamptz
-
-Contrainte conseillée :
-
-```sql
-unique (user_id, igdb_game_id)
-```
-
-Usage :
-
-- Bouton favori sur les fiches.
-- Liste des favoris sur le profil.
-- Exclusion des favoris dans le chatbot.
+La contrainte `unique (user_id, igdb_game_id)` empêche les doublons tout en autorisant plusieurs favoris par utilisateur. RLS limite la lecture, l'ajout et la suppression au propriétaire. `game_service` utilise la service role key pour exclure ces jeux des recommandations.
 
 ### `game_translations`
 
-Cache des traductions Mistral.
+Cache persistant des traductions Mistral.
 
-Colonnes principales :
+| Colonne | Type | Règle |
+| --- | --- | --- |
+| `igdb_game_id` | `bigint` | clé primaire |
+| `summary_fr` | `text` | nullable |
+| `storyline_fr` | `text` | nullable |
+| `created_at` | `timestamptz` | `now()` |
+| `updated_at` | `timestamptz` | date du dernier traitement |
 
-- `igdb_game_id` int8
-- `summary_fr` text
-- `storyline_fr` text
-- `created_at` timestamptz
-- `updated_at` timestamptz
-
-Usage :
-
-- Éviter de retraduire une fiche déjà traitée.
-- Limiter les coûts IA.
+Cette table est réservée à `game_service`. Aucun accès direct n'est accordé à `anon` ou `authenticated`.
 
 ### `glossary_entries`
 
-Propositions et entrées publiées du glossaire.
+Contenu principal du glossaire collaboratif.
 
-Colonnes principales :
+| Colonne | Type | Règle |
+| --- | --- | --- |
+| `id` | `uuid` | clé primaire |
+| `slug` | `text` | obligatoire, unique |
+| `title` | `text` | 1 à 90 caractères |
+| `short_description` | `text` | 1 à 220 caractères |
+| `detailed_description` | `text` | 1 à 6 000 caractères |
+| `status` | `text` | `pending`, `published` ou `rejected` |
+| `author_id` | `uuid` | FK vers `profiles`, `ON DELETE SET NULL` |
+| `reviewed_by` | `uuid` | admin modérateur, nullable |
+| `created_at` | `timestamptz` | `now()` |
+| `updated_at` | `timestamptz` | maintenu par trigger |
+| `published_at` | `timestamptz` | nullable |
 
-- `id` uuid
-- `slug` text, unique
-- `title` text
-- `short_description` text
-- `detailed_description` text
-- `status` text : `pending`, `published`, `rejected`
-- `author_id` uuid
-- `reviewed_by` uuid
-- `created_at` timestamptz
-- `updated_at` timestamptz
-- `published_at` timestamptz
-
-Usage :
-
-- Glossaire collaboratif.
-- Modération admin.
+Une contribution utilisateur commence en `pending`. Une contribution faite par un admin est publiée directement. La route `/api/admin` est la seule à modifier le statut et le rôle utilisateur.
 
 ### `glossary_entry_games`
 
-Jeux liés à une entrée du glossaire.
-
-Colonnes principales :
-
-- `id` uuid
-- `glossary_entry_id` uuid
-- `igdb_game_id` int8
-- `game_name` text
-- `cover_url` text
-- `sort_order` int
-- `created_at` timestamptz
-
-Usage :
-
-- Jeux mis en avant dans une page de détail du glossaire.
+Jeux IGDB illustrant une entrée. La clé étrangère vers `glossary_entries` utilise `ON DELETE CASCADE`. La combinaison `(glossary_entry_id, igdb_game_id)` est unique et `sort_order` conserve l'ordre choisi dans le formulaire.
 
 ### `glossary_entry_sources`
 
-Sources justificatives liées à une entrée du glossaire.
+Sources justificatives d'une entrée. Chaque URL doit commencer par `https://`, ne pas dépasser 2 048 caractères et être unique dans une même contribution. La route serveur refuse également localhost et les plages d'adresses privées.
 
-Colonnes principales :
-
-- `id` uuid
-- `glossary_entry_id` uuid
-- `label` text, nullable
-- `url` text
-- `created_at` timestamptz
-
-Règles :
-
-- Une proposition doit avoir au moins une source.
-- Les URL doivent utiliser `https://`.
-- Les liens sont affichés avec `target="_blank"` et `rel="noopener noreferrer nofollow"`.
-
-Usage :
-
-- Permettre à l'admin de vérifier une proposition avant publication.
-- Rendre les pages détaillées du glossaire plus fiables.
+Le serveur impose au moins une source lors de la soumission. Les liens affichés utilisent `noopener`, `noreferrer` et `nofollow`.
 
 ### `notifications`
 
-Notifications applicatives rattachées au profil utilisateur.
+Notifications générées après modération du glossaire.
 
-Colonnes conseillées :
+| Colonne | Type | Règle |
+| --- | --- | --- |
+| `id` | `uuid` | clé primaire |
+| `user_id` | `uuid` | destinataire, FK vers `profiles`, cascade |
+| `type` | `text` | `glossary_published` ou `glossary_rejected` |
+| `title` | `text` | libellé court |
+| `message` | `text` | contenu affiché |
+| `href` | `text` | lien interne nullable |
+| `read_at` | `timestamptz` | nullable, renseigné à la lecture |
+| `created_at` | `timestamptz` | `now()` |
 
-- `id` uuid
-- `user_id` uuid
-- `type` text
-- `title` text
-- `message` text
-- `href` text, nullable
-- `read_at` timestamptz, nullable
-- `created_at` timestamptz
+L'utilisateur lit uniquement ses notifications et peut seulement mettre à jour `read_at`. La création est réservée à la route admin avec la service role key.
 
-Requête de création :
+## RLS et service role
 
-```sql
-create table if not exists public.notifications (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles(user_id) on delete cascade,
-  type text not null check (type in ('glossary_published', 'glossary_rejected')),
-  title text not null,
-  message text not null,
-  href text,
-  read_at timestamptz,
-  created_at timestamptz not null default now()
-);
+RLS est activée sur toutes les tables publiques. Le script applique le principe suivant :
 
-create index if not exists notifications_user_created_idx
-  on public.notifications(user_id, created_at desc);
+- `profiles`, `favorites` et `notifications` : accès limité au propriétaire ;
+- glossaire : seules les entrées publiées et leurs relations sont lisibles publiquement ;
+- `game_translations` : accès serveur uniquement ;
+- administration, modération et création du glossaire : routes Next.js authentifiées utilisant la service role key.
 
-alter table public.notifications enable row level security;
+La service role key contourne RLS, mais elle a toujours besoin des privilèges SQL sur les tables. Le script lui accorde donc explicitement les droits nécessaires. Elle doit rester exclusivement dans les variables serveur du frontend et de `game_service`.
 
-drop policy if exists "Users can read their own notifications" on public.notifications;
-create policy "Users can read their own notifications"
-on public.notifications
-for select
-to authenticated
-using (auth.uid() = user_id);
+## Fonction `is_admin()`
 
-drop policy if exists "Users can update their own notifications" on public.notifications;
-create policy "Users can update their own notifications"
-on public.notifications
-for update
-to authenticated
-using (auth.uid() = user_id)
-with check (auth.uid() = user_id);
+`public.is_admin()` vérifie si l'utilisateur de la session courante possède `profiles.role = 'admin'`. Elle est déclarée `SECURITY DEFINER` pour éviter une récursion avec la policy RLS de `profiles`.
 
-grant select, insert, update, delete on public.notifications to service_role;
-grant select, update on public.notifications to authenticated;
-```
-
-Usage :
-
-- Notifier un contributeur quand une entrée de glossaire est publiée ou refusée.
-- Afficher les notifications dans la page profil.
-
-## Row Level Security
-
-RLS doit rester active sur les tables manipulées depuis le navigateur.
-
-Règle générale :
-
-- Les utilisateurs lisent/modifient uniquement leurs propres données.
-- Les entrées publiées sont lisibles publiquement.
-- Les admins peuvent lire/modérer les propositions.
-- Les routes serveur peuvent utiliser `SUPABASE_SERVICE_ROLE_KEY` pour les actions sensibles.
-
-## Fonction `is_admin`
-
-La fonction `public.is_admin()` sert à vérifier le rôle du user courant dans Supabase et le frontend.
-
-Principe :
+Le SQL Editor n'envoie pas le JWT du navigateur. `select public.is_admin();` y renvoie donc normalement `false`, même si une ligne admin existe. Pour promouvoir le premier admin :
 
 ```sql
-select exists (
-  select 1
-  from public.profiles
-  where user_id = auth.uid()
-    and role = 'admin'
-);
+update public.profiles
+set role = 'admin'
+where email = 'adresse@example.com';
 ```
 
-## Storage
+Le compte doit s'être connecté au moins une fois afin que sa ligne `profiles` existe.
 
-Bucket : `avatars`
+## Storage `avatars`
 
-Usage :
+Le bucket `avatars` est public pour permettre l'affichage via `getPublicUrl()`. Les écritures restent privées : chaque utilisateur ne peut gérer que le dossier dont le premier segment correspond à son UUID.
 
-- Upload de l'avatar utilisateur.
-- Affichage dans le profil et le header.
-- Suppression lors de la suppression du compte.
+Format attendu :
 
-Attention :
+```text
+avatars/<auth.uid()>/avatar.png
+```
 
-- Les policies Storage doivent autoriser l'utilisateur à gérer son propre dossier.
-- Un bucket public facilite l'affichage des avatars, mais il faut éviter une policy trop large de listage global.
+Le script limite les fichiers à 2 Mo et aux types JPEG, PNG, WebP et GIF. La route de suppression du compte utilise la service role key pour retirer les fichiers avant de supprimer l'utilisateur Auth.
 
-## Service role
+## Vérifications utiles
 
-La service role key contourne RLS. Elle doit rester uniquement côté serveur :
+Lister les contraintes et relations :
 
-- `frontend/app/api/admin/route.ts`
-- `frontend/app/api/account/route.ts`
-- `game_service/services/supabaseRestService.js`
+```sql
+select conrelid::regclass as table_name, conname, pg_get_constraintdef(oid)
+from pg_constraint
+where connamespace = 'public'::regnamespace
+order by table_name::text, conname;
+```
 
-Ne jamais l'utiliser dans un composant client.
+Lister les policies :
+
+```sql
+select schemaname, tablename, policyname, roles, cmd, qual, with_check
+from pg_policies
+where schemaname in ('public', 'storage')
+order by schemaname, tablename, policyname;
+```
+
+Lister les profils et leurs rôles :
+
+```sql
+select user_id, username, email, role, created_at
+from public.profiles
+order by created_at;
+```

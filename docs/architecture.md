@@ -10,8 +10,8 @@ Utilisateur
   | navigateur
   v
 Frontend Next.js
-  |-- Supabase client : auth, session, favoris, profil
-  |-- API routes serveur : admin, suppression compte
+  |-- Supabase client : auth, session, profil, favoris, notifications
+  |-- API routes serveur : admin, glossaire, suppression compte
   |-- Server Components : pages jeux, catalogue, détail
   |
   +--> game_service Express
@@ -33,6 +33,9 @@ Le frontend utilise l'App Router de Next.js. Les pages principales sont :
 - `/admin` : modération et gestion des rôles
 - `/chatbot` : recommandations RPG par IA
 - `/glossaire` : glossaire collaboratif
+- `/glossaire/proposer` : formulaire de contribution
+- `/glossaire/[slug]` : article détaillé, sources, auteur et jeux liés
+- `/glossaire/auteurs/[userId]` : publications d'un contributeur
 - `/personnages` : page statique actuelle, future page collaborative
 
 Le rendu est mixte :
@@ -58,9 +61,12 @@ Supabase gère :
 - Storage `avatars`.
 - Cache de traduction `game_translations`.
 - Tables collaboratives du glossaire.
+- Table `notifications` pour les décisions de modération.
 - Rôles `user` et `admin`.
 
 Les opérations sensibles passent par des routes serveur Next.js ou par le `game_service` avec la service role key.
+
+Le schéma, les cascades, les grants et les policies RLS reproductibles sont regroupés dans [`supabase-setup.sql`](supabase-setup.sql).
 
 ## E-mails
 

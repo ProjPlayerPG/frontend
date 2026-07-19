@@ -43,7 +43,7 @@ export default function RandomRpgButton() {
         disabled={loading}
         className="inline-flex min-h-13 items-center justify-center rounded-full border border-[var(--accent-cool)] bg-[var(--accent-cool)]/18 px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[var(--foreground)] shadow-[0_14px_34px_rgba(127,183,201,0.14)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-cool)]/28 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? 'Recherche...' : 'Decouvrir un RPG'}
+        {loading ? 'Recherche...' : 'Découvrir un RPG'}
       </button>
       {error ? <p className="text-xs text-red-100">{error}</p> : null}
     </div>

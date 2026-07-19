@@ -11,6 +11,8 @@ PlayerPG est une encyclopédie RPG moderne construite avec Next.js, Supabase et 
 
 ## Lancer le projet
 
+Pour une première installation, suivre le [guide d'installation locale](docs/installation.md). Il contient le schéma Supabase complet, les policies RLS, la configuration Auth et le parcours de vérification.
+
 Depuis la racine globale `PlayerPG`, lancer le frontend :
 
 ```bash
@@ -38,6 +40,9 @@ npm run dev
 npm run lint
 npm run build
 npm run start
+npm test
+npm run test:watch
+npm run test:coverage
 ```
 
 Service jeux :
@@ -49,10 +54,13 @@ npm run start
 
 ## Documentation frontend
 
+- [Installation locale et parcours jury](docs/installation.md)
 - [Architecture](docs/architecture.md)
 - [Variables d'environnement](docs/env.md)
 - [Supabase](docs/supabase.md)
+- [Script SQL Supabase](docs/supabase-setup.sql)
 - [Fonctionnalités](docs/features.md)
+- [Tests et couverture](docs/tests.md)
 
 ## Documentation services
 

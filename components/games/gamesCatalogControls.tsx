@@ -2,14 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { platformFilters, releaseYearFilters, sortOptions, tagFilters } from '@/lib/gamesFilters'
-
-export type GamesFilters = {
-  page: number
-  tag: string
-  platform: string
-  releaseYear: string
-  sort: string
-}
+import type { GamesFilters } from '@/lib/catalogFilters'
 
 function SelectShell({ children }: { children: React.ReactNode }) {
   return (

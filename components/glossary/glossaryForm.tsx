@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
+import { validateHttpsSource } from '@/lib/glossaryValidation'
 
 type SearchGame = {
   id: number
@@ -23,25 +24,6 @@ type SourceInput = {
 }
 
 const emptySource: SourceInput = { label: '', url: '' }
-
-function validateSourceUrl(value: string) {
-  try {
-    const url = new URL(value)
-    const hostname = url.hostname.toLowerCase()
-
-    if (url.protocol !== 'https:') return 'Les sources doivent utiliser HTTPS.'
-    if (hostname === 'localhost' || hostname.endsWith('.local')) return 'Les liens locaux ne sont pas autorises.'
-    if (/^(127|10)\./.test(hostname)) return 'Les adresses privees ne sont pas autorisees.'
-    if (/^192\.168\./.test(hostname)) return 'Les adresses privees ne sont pas autorisees.'
-    if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname)) return 'Les adresses privees ne sont pas autorisees.'
-    if (hostname === '0.0.0.0' || hostname === '::1') return 'Les adresses locales ne sont pas autorisees.'
-    if (value.length > 2048) return 'Cette URL est trop longue.'
-
-    return ''
-  } catch {
-    return 'Cette source doit être une URL HTTPS valide.'
-  }
-}
 
 export default function GlossaryForm() {
   const [sessionReady, setSessionReady] = useState(false)
@@ -176,7 +158,9 @@ export default function GlossaryForm() {
       return
     }
 
-    const sourceError = cleanedSources.map((source) => validateSourceUrl(source.url)).find(Boolean)
+    const sourceError = cleanedSources
+      .map((source) => validateHttpsSource(source.url, 'Cette source doit être une URL HTTPS valide.'))
+      .find(Boolean)
     if (sourceError) {
       setError(sourceError)
       return

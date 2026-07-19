@@ -84,7 +84,7 @@ export default async function GamesSpotlight() {
               </div>
 
               <p className="mt-4 line-clamp-3 text-sm leading-6 text-[var(--muted)]">
-                {game.summary ?? 'Une fiche recente a decouvrir dans le catalogue PlayerPG.'}
+                {game.summary ?? 'Une fiche récente à découvrir dans le catalogue PlayerPG.'}
               </p>
             </div>
           </Link>

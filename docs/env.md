@@ -17,8 +17,9 @@ SUPABASE_SERVICE_ROLE_KEY=
 BREVO_API_KEY=
 BREVO_SENDER_EMAIL=
 BREVO_SENDER_NAME=PlayerPG
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
+
+Une configuration complète des deux applications est disponible dans le [guide d'installation](installation.md). Ne jamais versionner le fichier `.env` réel.
 
 ### Détails
 
@@ -26,13 +27,13 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 : URL publique du projet Supabase.
 
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-: clé anon publique Supabase, utilisable côté navigateur avec RLS.
+: publishable key, ou clé legacy `anon`, utilisable côté navigateur avec RLS.
 
 `NEXT_PUBLIC_GAME_SERVICE_URL`
 : URL du service Express qui expose IGDB, Mistral et les endpoints de recommandations.
 
 `SUPABASE_SERVICE_ROLE_KEY`
-: clé serveur uniquement. Utilisée par les routes API Next.js pour les actions admin et la suppression de compte.
+: clé legacy `service_role` réservée au serveur. La version actuelle de `game_service` utilise cette clé JWT dans ses appels REST Supabase et n'est pas encore compatible avec les nouvelles clés `sb_secret_...`.
 
 `BREVO_API_KEY`
 : clé serveur uniquement. Elle servira aux e-mails applicatifs, pas à Supabase Auth.

@@ -18,7 +18,7 @@ export default async function Home({
 
         <div className="relative max-w-3xl">
           <h1 className="font-display mt-2 text-4xl font-semibold leading-none text-[var(--foreground)] sm:text-5xl">
-            PlayerPG, la reference moderne du RPG
+            PlayerPG, la référence moderne du RPG
           </h1>
 
           <div className="mt-6 flex flex-wrap gap-4">
