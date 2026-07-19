@@ -25,7 +25,7 @@ function serverError(message: string, status = 500) {
 }
 
 async function findUniqueSlug(admin: ReturnType<typeof createSupabaseAdminClient>, baseSlug: string) {
-  let candidate = baseSlug || 'entree'
+  let candidate = baseSlug || 'entrée'
 
   for (let index = 1; index < 50; index += 1) {
     const { data, error } = await admin
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const token = authHeader?.replace('Bearer ', '')
 
     if (!token) {
-      return serverError('Connecte-toi pour proposer une entree.', 401)
+      return serverError('Connecte-toi pour proposer une entrée.', 401)
     }
 
     const admin = createSupabaseAdminClient()
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     }
 
     if (!detailedDescription || detailedDescription.length > 6000) {
-      return serverError('Description avancee invalide.', 400)
+      return serverError('Description avancée invalide.', 400)
     }
 
     const sources = (body.sources ?? [])
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
 
     const uniqueUrls = new Set(sources.map((source) => source.url))
     if (uniqueUrls.size !== sources.length) {
-      return serverError('Une source ne peut pas etre ajoutee plusieurs fois.', 400)
+      return serverError('Une source ne peut pas être ajoutée plusieurs fois.', 400)
     }
 
     const games = (body.games ?? [])
@@ -171,6 +171,6 @@ export async function POST(request: Request) {
       status: entry.status,
     })
   } catch (error) {
-    return serverError(error instanceof Error ? error.message : 'Impossible de creer cette entree.')
+    return serverError(error instanceof Error ? error.message : 'Impossible de créer cette entrée.')
   }
 }

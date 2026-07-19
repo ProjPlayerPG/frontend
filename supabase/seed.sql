@@ -1,0 +1,3 @@
+-- Données locales reproductibles à ajouter lorsque des scénarios de démonstration
+-- stables seront définis. Ce fichier volontairement vide évite que db reset
+-- cherche une ressource absente.

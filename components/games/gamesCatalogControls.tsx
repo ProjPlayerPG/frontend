@@ -103,14 +103,14 @@ export default function GamesCatalogControls({
         </label>
 
         <label className="grid gap-2">
-          <span className="text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">Annee de sortie</span>
+          <span className="text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">Année de sortie</span>
           <SelectShell>
             <select
               value={filters.releaseYear}
               onChange={(event) => navigate({ releaseYear: event.target.value, page: 0 })}
               className="h-12 w-full appearance-none rounded-full border border-[var(--line)] bg-[var(--surface-strong)] py-0 pl-4 pr-12 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--line-strong)]"
             >
-              <option value="">Toutes les annees</option>
+              <option value="">Toutes les années</option>
               {releaseYearFilters.map((year) => (
                 <option key={year} value={year}>
                   {year}
@@ -142,7 +142,7 @@ export default function GamesCatalogControls({
           onClick={resetFilters}
           className="h-12 rounded-full border border-[var(--line)] px-5 text-sm uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-white/7 hover:text-[var(--foreground)] md:col-span-2 md:mx-auto md:w-full md:max-w-lg xl:col-span-4"
         >
-          Reinitialiser
+          Réinitialiser
         </button>
     </div>
   )

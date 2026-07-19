@@ -10,7 +10,7 @@ export function slugify(value: string) {
 
 export function validateHttpsSource(
   value: string,
-  invalidUrlMessage = 'Chaque source doit etre une URL HTTPS valide.',
+  invalidUrlMessage = 'Chaque source doit être une URL HTTPS valide.',
 ) {
   try {
     const url = new URL(value)
@@ -18,15 +18,15 @@ export function validateHttpsSource(
 
     if (url.protocol !== 'https:') return 'Les sources doivent utiliser HTTPS.'
     if (hostname === 'localhost' || hostname.endsWith('.local')) {
-      return 'Les liens locaux ne sont pas autorises.'
+      return 'Les liens locaux ne sont pas autorisés.'
     }
-    if (/^(127|10)\./.test(hostname)) return 'Les adresses privees ne sont pas autorisees.'
-    if (/^192\.168\./.test(hostname)) return 'Les adresses privees ne sont pas autorisees.'
+    if (/^(127|10)\./.test(hostname)) return 'Les adresses privées ne sont pas autorisées.'
+    if (/^192\.168\./.test(hostname)) return 'Les adresses privées ne sont pas autorisées.'
     if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname)) {
-      return 'Les adresses privees ne sont pas autorisees.'
+      return 'Les adresses privées ne sont pas autorisées.'
     }
     if (hostname === '0.0.0.0' || hostname === '[::1]' || hostname === '::1') {
-      return 'Les adresses locales ne sont pas autorisees.'
+      return 'Les adresses locales ne sont pas autorisées.'
     }
     if (value.length > 2048) return 'Cette URL est trop longue.'
 

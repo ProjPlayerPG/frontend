@@ -17,7 +17,7 @@ const bodyFont = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "PlayerPG",
-  description: "Une bibliotheque RPG inspiree des grandes aventures fantasy.",
+  description: "Une bibliothèque RPG inspirée des grandes aventures fantasy.",
 };
 
 export default function RootLayout({

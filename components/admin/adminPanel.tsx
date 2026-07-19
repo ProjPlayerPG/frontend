@@ -141,7 +141,7 @@ export default function AdminPanel() {
       setEntrySources(payload.entrySources)
       setAuthors(payload.authors)
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'Impossible de charger l administration.')
+      setError(loadError instanceof Error ? loadError.message : 'Impossible de charger l’administration.')
     } finally {
       setLoading(false)
     }
@@ -178,7 +178,7 @@ export default function AdminPanel() {
       )
       setMessage(`${profile.username} est maintenant ${role === 'admin' ? 'admin' : 'utilisateur'}.`)
     } catch (roleError) {
-      setError(roleError instanceof Error ? roleError.message : 'Impossible de changer le role.')
+      setError(roleError instanceof Error ? roleError.message : 'Impossible de changer le rôle.')
     } finally {
       setSubmitting('')
     }
@@ -200,9 +200,9 @@ export default function AdminPanel() {
       })
 
       setPendingEntries((currentEntries) => currentEntries.filter((currentEntry) => currentEntry.id !== entry.id))
-      setMessage(`${entry.title} a ete ${status === 'published' ? 'publie' : 'rejete'}.`)
+      setMessage(`${entry.title} a été ${status === 'published' ? 'publiée' : 'rejetée'}.`)
     } catch (reviewError) {
-      setError(reviewError instanceof Error ? reviewError.message : 'Impossible de moderer cette entree.')
+      setError(reviewError instanceof Error ? reviewError.message : 'Impossible de modérer cette entrée.')
     } finally {
       setSubmitting('')
     }
@@ -245,7 +245,7 @@ export default function AdminPanel() {
       <section className="panel rounded-[2rem] p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Moderation</p>
+            <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Modération</p>
             <h2 className="font-display mt-2 text-3xl text-[var(--foreground)]">Glossaire en attente</h2>
           </div>
           <p className="text-sm text-[var(--muted)]">
@@ -339,7 +339,7 @@ export default function AdminPanel() {
       <section className="panel rounded-[2rem] p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Roles</p>
+            <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Rôles</p>
             <h2 className="font-display mt-2 text-3xl text-[var(--foreground)]">Utilisateurs</h2>
           </div>
           <p className="text-sm text-[var(--muted)]">

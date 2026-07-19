@@ -1,8 +1,8 @@
 const archetypes = [
-  { name: 'Mage', role: 'Degats elementaires, controle et soutien fragile.' },
-  { name: 'Guerrier', role: 'Presence au front, protection et puissance physique.' },
-  { name: 'Voleur', role: 'Mobilite, critiques, pieges et exploration.' },
-  { name: 'Soigneur', role: 'Restauration, prevention et stabilite du groupe.' },
+  { name: 'Mage', role: 'Dégâts élémentaires, contrôle et soutien fragile.' },
+  { name: 'Guerrier', role: 'Présence au front, protection et puissance physique.' },
+  { name: 'Voleur', role: 'Mobilité, critiques, pièges et exploration.' },
+  { name: 'Soigneur', role: 'Restauration, prévention et stabilité du groupe.' },
 ]
 
 export default function PersonnagesPage() {
@@ -11,7 +11,7 @@ export default function PersonnagesPage() {
       <section className="mb-8">
         <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--accent-cool)]">Personnages</p>
         <h1 className="font-display mt-2 text-5xl font-semibold leading-none text-[var(--foreground)]">
-          Archetypes et roles
+          Archétypes et rôles
         </h1>
       </section>
 

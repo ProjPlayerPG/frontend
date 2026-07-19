@@ -196,7 +196,7 @@ export default async function GameDetails({
                 </p>
               </div>
               <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
-                <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Editeur</p>
+                <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Éditeur</p>
                 <p className="mt-2 text-base font-medium leading-7 text-[var(--foreground)]">
                   {compactList(publishers, 'Non renseigne')}
                 </p>
@@ -208,7 +208,7 @@ export default async function GameDetails({
             <div className="mt-8 max-w-3xl rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
               <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Notes presse</p>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                Les notes presse seront ajoutees via des sources stables et officielles lorsque disponibles.
+                Les notes presse seront ajoutées via des sources stables et officielles lorsque disponibles.
                 PlayerPG evite le scraping fragile pour garder des fiches fiables.
               </p>
             </div>

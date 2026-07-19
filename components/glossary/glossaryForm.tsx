@@ -149,7 +149,7 @@ export default function GlossaryForm() {
       .filter((source) => source.url)
 
     if (!title.trim() || !shortDescription.trim() || !detailedDescription.trim()) {
-      setError('Remplis le titre, la description courte et la description avancee.')
+      setError('Remplis le titre, la description courte et la description avancée.')
       return
     }
 
@@ -195,7 +195,7 @@ export default function GlossaryForm() {
       const payload = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(payload?.error || 'Impossible d envoyer cette proposition.')
+        throw new Error(payload?.error || 'Impossible d’envoyer cette proposition.')
       }
 
       setTitle('')
@@ -205,11 +205,11 @@ export default function GlossaryForm() {
       setSelectedGames([])
       setMessage(
         payload.status === 'published'
-          ? 'Entree publiee dans le glossaire.'
-          : 'Proposition envoyee. Elle sera visible apres validation admin.',
+          ? 'Entrée publiée dans le glossaire.'
+          : 'Proposition envoyée. Elle sera visible après validation admin.',
       )
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Impossible d envoyer cette proposition.')
+      setError(submitError instanceof Error ? submitError.message : 'Impossible d’envoyer cette proposition.')
     } finally {
       setSubmitting(false)
     }
@@ -286,7 +286,7 @@ export default function GlossaryForm() {
               onChange={(event) => setDetailedDescription(event.target.value)}
               rows={8}
               className="resize-y rounded-[1.2rem] border border-[var(--line)] bg-black/18 px-5 py-4 text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
-              placeholder="Le contenu détaillé affiche sur la page de l&apos;entrée."
+              placeholder="Le contenu détaillé affiché sur la page de l&apos;entrée."
             />
           </label>
 

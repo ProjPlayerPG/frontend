@@ -59,9 +59,9 @@ export default async function GlossairePage() {
         </div>
       ) : (
         <section className="panel rounded-[1.5rem] p-6">
-          <h2 className="font-display text-3xl text-[var(--foreground)]">Aucune entree publiee</h2>
+          <h2 className="font-display text-3xl text-[var(--foreground)]">Aucune entrée publiée</h2>
           <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-            Les premieres propositions apparaitront ici apres validation.
+            Les premières propositions apparaîtront ici après validation.
           </p>
         </section>
       )}

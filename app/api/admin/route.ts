@@ -21,7 +21,7 @@ function createAdminClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY doit etre configuree cote serveur.')
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY doit être configurée côté serveur.')
   }
 
   return createClient(supabaseUrl, serviceRoleKey, {
@@ -58,7 +58,7 @@ async function requireAdmin(request: Request) {
   }
 
   if (profile?.role !== 'admin') {
-    return { error: serverError('Acces reserve aux administrateurs.', 403) }
+    return { error: serverError('Accès réservé aux administrateurs.', 403) }
   }
 
   return { admin, userId: userData.user.id }
@@ -146,11 +146,11 @@ export async function PATCH(request: Request) {
 
     if (body.action === 'updateRole') {
       if (!['user', 'admin'].includes(body.role)) {
-        return serverError('Role invalide.', 400)
+        return serverError('Rôle invalide.', 400)
       }
 
       if (body.userId === auth.userId && body.role !== 'admin') {
-        return serverError('Tu ne peux pas retirer ton propre role admin.', 400)
+        return serverError('Tu ne peux pas retirer ton propre rôle admin.', 400)
       }
 
       const { data, error } = await admin
@@ -192,15 +192,15 @@ export async function PATCH(request: Request) {
           ? {
               user_id: data.author_id,
               type: 'glossary_published',
-              title: 'Publication acceptee',
-              message: `Ton entree "${data.title}" est maintenant visible dans le glossaire.`,
+              title: 'Publication acceptée',
+              message: `Ton entrée "${data.title}" est maintenant visible dans le glossaire.`,
               href: `/glossaire/${data.slug}`,
             }
           : {
               user_id: data.author_id,
               type: 'glossary_rejected',
-              title: 'Publication refusee',
-              message: `Ton entree "${data.title}" n'a pas ete publiee pour le moment.`,
+              title: 'Publication refusée',
+              message: `Ton entrée "${data.title}" n'a pas été publiée pour le moment.`,
               href: '/glossaire/proposer',
             }
 

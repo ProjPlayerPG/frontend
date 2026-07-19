@@ -18,18 +18,18 @@ export default function RandomRpgButton() {
       const response = await fetch(`${baseUrl}/api/games/random`)
 
       if (!response.ok) {
-        throw new Error('Aucun RPG aleatoire disponible.')
+        throw new Error('Aucun RPG aléatoire disponible.')
       }
 
       const game = (await response.json()) as { id?: number }
 
       if (!game.id) {
-        throw new Error('Aucun RPG aleatoire disponible.')
+        throw new Error('Aucun RPG aléatoire disponible.')
       }
 
       router.push(`/games/${game.id}`)
     } catch (randomError) {
-      setError(randomError instanceof Error ? randomError.message : 'Impossible de lancer la decouverte.')
+      setError(randomError instanceof Error ? randomError.message : 'Impossible de lancer la découverte.')
     } finally {
       setLoading(false)
     }

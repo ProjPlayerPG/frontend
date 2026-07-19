@@ -147,6 +147,17 @@ alter table public.glossary_entry_sources enable row level security;
 alter table public.notifications enable row level security;
 
 grant usage on schema public to anon, authenticated, service_role;
+revoke create on schema public from public, anon, authenticated;
+
+-- Les futurs objets reçoivent des droits explicites dans leurs migrations.
+alter default privileges for role postgres in schema public
+  revoke all on tables from anon, authenticated;
+alter default privileges for role postgres in schema public
+  grant all on tables to service_role;
+alter default privileges for role postgres in schema public
+  revoke execute on functions from public, anon, authenticated;
+alter default privileges for role postgres in schema public
+  grant execute on functions to service_role;
 
 revoke all on public.profiles from anon, authenticated;
 grant select on public.profiles to authenticated;
@@ -300,4 +311,3 @@ using (
   bucket_id = 'avatars'
   and (storage.foldername(name))[1] = auth.uid()::text
 );
-

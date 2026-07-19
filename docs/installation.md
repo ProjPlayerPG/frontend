@@ -14,17 +14,30 @@ Brevo n'est pas requis pour tester le projet localement. Supabase Auth peut util
 
 ## 1. Préparer Supabase
 
-Dans le SQL Editor d'un projet Supabase neuf, exécuter le fichier [`supabase-setup.sql`](supabase-setup.sql). Il crée :
+Docker Desktop doit être démarré. Depuis `frontend/frontend`, installer les dépendances puis reconstruire Supabase localement :
 
-- les tables et leurs contraintes ;
-- les clés étrangères et suppressions en cascade ;
-- la fonction `public.is_admin()` ;
-- les privilèges SQL et policies RLS ;
-- le bucket public `avatars` et ses policies Storage.
+```bash
+npm install
+npx supabase start
+npx supabase db reset
+```
 
-Le détail de chaque table et des choix de sécurité se trouve dans [Supabase](supabase.md).
+`db reset` recrée uniquement la base locale, applique dans l'ordre les fichiers de `supabase/migrations/`, puis charge `supabase/seed.sql`. Les migrations constituent la source de vérité versionnée du schéma.
 
-Dans les réglages **Data API**, conserver l'API activée et le schéma `public` exposé. Le script gère lui-même les grants et RLS ; il n'est donc pas nécessaire d'accorder automatiquement des droits aux nouvelles tables.
+Pour préparer un projet Supabase distant neuf :
+
+```bash
+npx supabase login
+npx supabase link --project-ref <project-ref>
+npx supabase db push --dry-run
+npx supabase db push
+```
+
+Ne jamais exécuter `supabase db reset --linked` sur une base contenant des données : cette variante détruit et reconstruit la base distante.
+
+Le fichier [`supabase-setup.sql`](supabase-setup.sql) reste une référence SQL consolidée et lisible. Il ne remplace pas l'historique des migrations. Le détail de chaque table et des choix de sécurité se trouve dans [Supabase](supabase.md).
+
+Dans les réglages **Data API**, conserver l'API activée et le schéma `public` exposé. Les migrations gèrent elles-mêmes les grants et RLS ; il n'est donc pas nécessaire d'accorder automatiquement des droits aux nouvelles tables.
 
 ## 2. Configurer Supabase Auth
 
@@ -147,7 +160,7 @@ Les détails du socle de tests, les modules couverts et les prochaines étapes s
 
 ## Dépannage rapide
 
-- `permission denied for table ...` : exécuter à nouveau la section concernée de `supabase-setup.sql` et vérifier les grants autant que les policies.
+- `permission denied for table ...` : vérifier l'historique avec `npx supabase migration list`, puis contrôler les grants autant que les policies. Ne pas corriger directement la base distante hors migration.
 - Erreur `401` : la session a expiré ou le token n'est pas transmis ; se reconnecter.
 - Erreur `403` dans `/admin` : vérifier `profiles.role = 'admin'` pour le compte connecté.
 - Erreur `409` sur les favoris : vérifier la contrainte unique `(user_id, igdb_game_id)` et que `id` utilise bien `gen_random_uuid()`.

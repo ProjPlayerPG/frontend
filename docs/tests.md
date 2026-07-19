@@ -44,6 +44,16 @@ Les tests couvrent actuellement :
 
 Les appels réels à IGDB, Mistral et Supabase ne sont pas exécutés par ces tests unitaires.
 
+### Base Supabase locale
+
+Après `npx supabase start` et `npx supabase db reset`, le contrôle d'intégration SQL vérifie les permissions de `profiles`, les policies RLS, les contraintes validées et la configuration du bucket `avatars` :
+
+```bash
+npx supabase db query --local --file supabase/tests/security.sql
+```
+
+Ce test échoue notamment si le rôle `authenticated` récupère un droit d'écriture sur `profiles.role`. Il ne contacte pas la base distante et ne laisse aucune donnée de test.
+
 ## Organisation
 
 Les fichiers de test sont placés à côté du module testé avec le suffixe `.test.ts` ou `.test.js`. Les fonctions métier pures sont isolées des composants et des appels réseau afin de rester rapides et déterministes.

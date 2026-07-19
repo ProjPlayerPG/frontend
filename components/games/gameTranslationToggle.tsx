@@ -91,7 +91,7 @@ export default function GameTranslationToggle({ gameId, summary, storyline }: Ga
       ) : null}
 
       <p className="mt-3 text-base leading-8 text-[var(--muted)] sm:text-lg">
-        {summaryText ?? 'Aucun resume nest disponible pour cette fiche.'}
+        {summaryText ?? 'Aucun résumé n’est disponible pour cette fiche.'}
       </p>
 
       {storylineText ? (

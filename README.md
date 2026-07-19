@@ -43,6 +43,10 @@ npm run start
 npm test
 npm run test:watch
 npm run test:coverage
+npx supabase start
+npx supabase db reset
+npx supabase migration list
+npx supabase db push --dry-run
 ```
 
 Service jeux :
@@ -58,7 +62,7 @@ npm run start
 - [Architecture](docs/architecture.md)
 - [Variables d'environnement](docs/env.md)
 - [Supabase](docs/supabase.md)
-- [Script SQL Supabase](docs/supabase-setup.sql)
+- [Référence SQL Supabase consolidée](docs/supabase-setup.sql)
 - [Fonctionnalités](docs/features.md)
 - [Tests et couverture](docs/tests.md)
 

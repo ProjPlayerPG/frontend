@@ -69,7 +69,7 @@ export default function RpgChatbot() {
           </h2>
         </div>
         <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">
-          Decris ton envie, PlayerPG propose des RPG adaptes.
+          Décris ton envie, PlayerPG propose des RPG adaptés.
         </p>
       </div>
 
@@ -79,7 +79,7 @@ export default function RpgChatbot() {
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             className="rounded-[1.1rem] border border-[var(--line)] bg-black/18 px-4 py-3 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/60 focus:border-[var(--accent)]"
-            placeholder="Ex: je veux un tactical RPG recent avec une bonne histoire"
+            placeholder="Ex. : je veux un tactical RPG récent avec une bonne histoire"
           />
           <button
             type="submit"

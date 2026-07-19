@@ -2,9 +2,24 @@
 
 Supabase est le backend headless de PlayerPG pour l'authentification, les profils, les favoris, les rôles, le cache des traductions, le glossaire, les notifications et les avatars.
 
-Pour reproduire la base sur un projet neuf, exécuter [`supabase-setup.sql`](supabase-setup.sql) dans le SQL Editor. Le parcours complet est détaillé dans le [guide d'installation](installation.md).
+Le schéma est versionné dans `supabase/migrations/`. Une base locale complète est reconstruite avec `npx supabase db reset`; un projet distant reçoit uniquement les migrations manquantes avec `npx supabase db push`. Le parcours complet est détaillé dans le [guide d'installation](installation.md).
+
+[`supabase-setup.sql`](supabase-setup.sql) reste une vue consolidée destinée à la lecture. En cas d'écart, les migrations sont la source de vérité.
 
 La Data API doit être active pour le schéma `public`. L'exposition automatique des nouvelles tables peut rester désactivée : le script attribue explicitement chaque privilège.
+
+## Migrations et collaboration
+
+Les migrations déjà partagées ou appliquées ne sont jamais réécrites. Chaque évolution du schéma, des contraintes, des privilèges ou des policies reçoit un nouveau fichier horodaté :
+
+```bash
+npx supabase migration new nom_du_changement
+npx supabase db reset
+npx supabase db push --dry-run
+npx supabase db push
+```
+
+Après un changement récupéré depuis Git, `npx supabase db reset` vérifie que toute l'histoire peut être rejouée sur une base locale vierge. Une seule personne ou le pipeline de déploiement doit pousser les migrations distantes à la fois.
 
 ## Modèle de données
 

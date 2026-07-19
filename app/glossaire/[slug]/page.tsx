@@ -141,7 +141,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_18rem]">
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">Definition</h2>
+            <h2 className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">Définition</h2>
             <div className="mt-4 space-y-5 text-base leading-8 text-[var(--muted)]">
               {entry.detailed_description.split(/\n{2,}/).map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
@@ -153,7 +153,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
             {author ? (
               <section className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
                 <h2 className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent-cool)]">
-                  Propose par
+                  Proposé par
                 </h2>
                 <Link
                   href={`/glossaire/auteurs/${author.user_id}`}

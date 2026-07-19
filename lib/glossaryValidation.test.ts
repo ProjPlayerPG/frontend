@@ -28,7 +28,7 @@ describe('validateHttpsSource', () => {
     'https://localhost/test',
     'https://playerpg.local/test',
   ])('refuse le nom d’hôte local %s', (url) => {
-    expect(validateHttpsSource(url)).toBe('Les liens locaux ne sont pas autorises.')
+    expect(validateHttpsSource(url)).toBe('Les liens locaux ne sont pas autorisés.')
   })
 
   it.each([
@@ -38,11 +38,11 @@ describe('validateHttpsSource', () => {
     'https://172.16.0.1/test',
     'https://172.31.255.255/test',
   ])('refuse l’adresse privée %s', (url) => {
-    expect(validateHttpsSource(url)).toBe('Les adresses privees ne sont pas autorisees.')
+    expect(validateHttpsSource(url)).toBe('Les adresses privées ne sont pas autorisées.')
   })
 
   it.each(['https://0.0.0.0/test', 'https://[::1]/test'])('refuse l’adresse locale %s', (url) => {
-    expect(validateHttpsSource(url)).toBe('Les adresses locales ne sont pas autorisees.')
+    expect(validateHttpsSource(url)).toBe('Les adresses locales ne sont pas autorisées.')
   })
 
   it('refuse une URL de plus de 2 048 caractères', () => {

@@ -143,14 +143,14 @@ export default function GameSearchBar({ compact = false }: { compact?: boolean }
                       {game.name}
                     </p>
                     <p className="mt-2 text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">
-                      Voir les details
+                      Voir les détails
                     </p>
                   </div>
                 </button>
               )
             })
           ) : (
-            <div className="px-4 py-4 text-sm text-[var(--muted)]">Aucun resultat.</div>
+            <div className="px-4 py-4 text-sm text-[var(--muted)]">Aucun résultat.</div>
           )}
         </div>
       ) : null}

@@ -93,7 +93,7 @@ export default async function GlossaryAuthorPage({ params }: PageProps) {
               {author.username}
             </h1>
             <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-              {entries.length} entree{entries.length > 1 ? 's' : ''} publiee{entries.length > 1 ? 's' : ''}
+              {entries.length} entrée{entries.length > 1 ? 's' : ''} publiée{entries.length > 1 ? 's' : ''}
             </p>
           </div>
         </div>
@@ -120,7 +120,7 @@ export default async function GlossaryAuthorPage({ params }: PageProps) {
           </div>
         ) : (
           <p className="mt-5 rounded-[1.2rem] border border-[var(--line)] bg-black/12 p-4 text-sm text-[var(--muted)]">
-            Aucune entree publiee pour le moment.
+            Aucune entrée publiée pour le moment.
           </p>
         )}
       </section>

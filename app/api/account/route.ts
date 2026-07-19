@@ -12,7 +12,7 @@ export async function DELETE(request: Request) {
 
   if (!supabaseUrl || !serviceRoleKey) {
     return Response.json(
-      { error: 'SUPABASE_SERVICE_ROLE_KEY doit etre configuree cote serveur.' },
+      { error: 'SUPABASE_SERVICE_ROLE_KEY doit être configurée côté serveur.' },
       { status: 500 },
     )
   }
@@ -52,7 +52,7 @@ export async function DELETE(request: Request) {
     }
   }
 
-  // Les lignes profiles/favorites doivent disparaitre via les foreign keys ON DELETE CASCADE.
+  // Les lignes profiles/favorites doivent disparaître via les foreign keys ON DELETE CASCADE.
   // Cela evite de dependre des grants directs sur les tables publiques dans cette route.
   const { error: deleteError } = await admin.auth.admin.deleteUser(userId, false)
 
@@ -73,13 +73,13 @@ export async function DELETE(request: Request) {
     .maybeSingle()
 
   if (remainingProfileError) {
-    return deleteStepError('Verification du profil impossible', remainingProfileError.message)
+    return deleteStepError('Vérification du profil impossible', remainingProfileError.message)
   }
 
   if (remainingProfile) {
     return deleteStepError(
       'Profil encore present',
-      'verifie la foreign key profiles.user_id vers auth.users.id avec ON DELETE CASCADE.',
+      'vérifie la foreign key profiles.user_id vers auth.users.id avec ON DELETE CASCADE.',
     )
   }
 

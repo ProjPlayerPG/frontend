@@ -26,7 +26,7 @@ type Favorite = {
 
 function profileErrorMessage(error: unknown) {
   if (error instanceof Error && error.message.includes('permission denied')) {
-    return 'Supabase bloque la table profiles. Verifie les policies RLS de lecture, insertion et update.'
+    return 'Supabase bloque la table profiles. Vérifie les policies RLS de lecture, d’insertion et de mise à jour.'
   }
 
   return error instanceof Error ? error.message : 'Impossible de charger le profil.'
@@ -274,7 +274,7 @@ export default function ProfileAuthPanel() {
         const cleanUsername = username.trim()
 
         if (!cleanUsername) {
-          setError('Choisis un pseudo pour creer ton compte.')
+          setError('Choisis un pseudo pour créer ton compte.')
           return
         }
 
@@ -294,9 +294,9 @@ export default function ProfileAuthPanel() {
 
         if (data.session?.user) {
           setProfile(await ensureProfile(data.session.user))
-          setMessage('Compte cree, tu es connecte.')
+          setMessage('Compte créé, tu es connecté.')
         } else {
-          setMessage('Compte cree. Verifie tes emails pour confirmer ton inscription avant de te connecter.')
+          setMessage('Compte créé. Vérifie tes e-mails pour confirmer ton inscription avant de te connecter.')
         }
       } else {
         const { error: signinError } = await supabase.auth.signInWithPassword({
@@ -308,7 +308,7 @@ export default function ProfileAuthPanel() {
           throw signinError
         }
 
-        setMessage('Connexion reussie.')
+        setMessage('Connexion réussie.')
       }
 
       setPassword('')
@@ -329,7 +329,7 @@ export default function ProfileAuthPanel() {
       const cleanEmail = forgotEmail.trim()
 
       if (!cleanEmail) {
-        setError('Renseigne ton email pour recevoir le lien de reinitialisation.')
+        setError('Renseigne ton e-mail pour recevoir le lien de réinitialisation.')
         return
       }
 
@@ -341,9 +341,9 @@ export default function ProfileAuthPanel() {
         throw resetError
       }
 
-      setMessage('Si un compte existe avec cet email, un lien de reinitialisation vient d etre envoye.')
+      setMessage('Si un compte existe avec cet e-mail, un lien de réinitialisation vient d’être envoyé.')
     } catch (forgotError) {
-      setError(forgotError instanceof Error ? forgotError.message : 'Impossible d envoyer le lien.')
+      setError(forgotError instanceof Error ? forgotError.message : 'Impossible d’envoyer le lien.')
     } finally {
       setSubmitting(false)
     }
@@ -359,7 +359,7 @@ export default function ProfileAuthPanel() {
       const cleanPassword = recoveryPassword.trim()
 
       if (cleanPassword.length < 6) {
-        setError('Le nouveau mot de passe doit contenir au moins 6 caracteres.')
+        setError('Le nouveau mot de passe doit contenir au moins 6 caractères.')
         return
       }
 
@@ -374,7 +374,7 @@ export default function ProfileAuthPanel() {
       setRecoveryPassword('')
       setPasswordRecovery(false)
       window.history.replaceState(null, '', '/profile')
-      setMessage('Mot de passe mis a jour.')
+      setMessage('Mot de passe mis à jour.')
     } catch (recoveryError) {
       setError(recoveryError instanceof Error ? recoveryError.message : 'Impossible de modifier le mot de passe.')
     } finally {
@@ -395,7 +395,7 @@ export default function ProfileAuthPanel() {
       setEmail('')
       setPassword('')
       setUsername('')
-      setMessage('Tu es deconnecte.')
+      setMessage('Tu es déconnecté.')
     }
 
     setSubmitting(false)
@@ -448,7 +448,7 @@ export default function ProfileAuthPanel() {
       }
 
       setProfile(updatedProfile as Profile)
-      setMessage('Avatar mis a jour.')
+      setMessage('Avatar mis à jour.')
     } catch (avatarError) {
       setError(profileErrorMessage(avatarError))
     } finally {
@@ -469,7 +469,7 @@ export default function ProfileAuthPanel() {
     const cleanPassword = newPassword.trim()
 
     if (!cleanUsername || !cleanEmail) {
-      setError('Le pseudo et l email sont obligatoires.')
+      setError('Le pseudo et l’e-mail sont obligatoires.')
       return
     }
 
@@ -517,8 +517,8 @@ export default function ProfileAuthPanel() {
       setNewPassword('')
       setMessage(
         cleanEmail !== currentUser.email
-          ? 'Profil mis a jour. Verifie tes emails si Supabase demande une confirmation.'
-          : 'Profil mis a jour.',
+          ? 'Profil mis à jour. Vérifie tes e-mails si Supabase demande une confirmation.'
+          : 'Profil mis à jour.',
       )
     } catch (updateError) {
       setError(profileErrorMessage(updateError))
@@ -554,7 +554,7 @@ export default function ProfileAuthPanel() {
       setSession(null)
       setProfile(null)
       setDeleteConfirmation('')
-      setMessage('Compte supprime.')
+      setMessage('Compte supprimé.')
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : 'Impossible de supprimer le compte.')
     } finally {
@@ -582,7 +582,7 @@ export default function ProfileAuthPanel() {
     }
 
     setFavorites((currentFavorites) => currentFavorites.filter((item) => item.id !== favorite.id))
-    setMessage(`${favorite.game_name} retire des favoris.`)
+    setMessage(`${favorite.game_name} retiré des favoris.`)
   }
 
   if (loading) {
@@ -617,7 +617,7 @@ export default function ProfileAuthPanel() {
               minLength={6}
               required
               className="rounded-[1.1rem] border border-[var(--line)] bg-black/18 px-4 py-3 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/60 focus:border-[var(--accent)]"
-              placeholder="Minimum 6 caracteres"
+              placeholder="Minimum 6 caractères"
             />
           </label>
 
@@ -637,7 +637,7 @@ export default function ProfileAuthPanel() {
             disabled={resettingPassword}
             className="rounded-full border border-[var(--accent-strong)] bg-[var(--accent)] px-6 py-4 text-sm font-bold uppercase tracking-[0.2em] text-[#101722] shadow-[0_18px_40px_rgba(223,191,122,0.18)] transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-55"
           >
-            {resettingPassword ? 'Mise a jour...' : 'Modifier le mot de passe'}
+            {resettingPassword ? 'Mise à jour...' : 'Modifier le mot de passe'}
           </button>
         </form>
       </section>
@@ -714,7 +714,7 @@ export default function ProfileAuthPanel() {
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
-            <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Bibliotheque</p>
+            <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Bibliothèque</p>
             <p className="font-display mt-2 text-2xl text-[var(--foreground)]">
               {loadingFavorites ? '...' : `${favorites.length} favori${favorites.length > 1 ? 's' : ''}`}
             </p>
@@ -805,7 +805,7 @@ export default function ProfileAuthPanel() {
           <div>
             <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Informations</p>
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-              Modifie ton pseudo, ton email ou ton mot de passe.
+              Modifie ton pseudo, ton e-mail ou ton mot de passe.
             </p>
           </div>
 
@@ -851,14 +851,14 @@ export default function ProfileAuthPanel() {
             disabled={updatingProfile}
             className="rounded-full border border-[var(--accent-strong)] bg-[var(--accent)] px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[#101722] transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-55"
           >
-            {updatingProfile ? 'Mise a jour...' : 'Enregistrer'}
+            {updatingProfile ? 'Mise à jour...' : 'Enregistrer'}
           </button>
         </form>
 
         <div className="mt-5 rounded-[1.5rem] border border-red-300/25 bg-red-400/8 p-5">
           <p className="text-xs uppercase tracking-[0.26em] text-red-100">Zone dangereuse</p>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            La suppression retire ton profil, tes favoris, ton avatar et ton acces de connexion.
+            La suppression retire ton profil, tes favoris, ton avatar et ton accès de connexion.
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
             <input
@@ -887,7 +887,7 @@ export default function ProfileAuthPanel() {
         <div>
           <p className="text-sm uppercase tracking-[0.28em] text-[var(--accent-cool)]">Compte</p>
           <h1 className="font-display mt-2 text-5xl font-semibold leading-none text-[var(--foreground)]">
-            {isSignup ? 'Creer un profil' : isForgotPassword ? 'Mot de passe oublie' : 'Connexion'}
+            {isSignup ? 'Créer un profil' : isForgotPassword ? 'Mot de passe oublié' : 'Connexion'}
           </h1>
         </div>
 
@@ -996,7 +996,7 @@ export default function ProfileAuthPanel() {
             minLength={6}
             required
             className="rounded-[1.1rem] border border-[var(--line)] bg-black/18 px-4 py-3 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/60 focus:border-[var(--accent)]"
-            placeholder="Minimum 6 caracteres"
+            placeholder="Minimum 6 caractères"
           />
         </label>
 
@@ -1016,7 +1016,7 @@ export default function ProfileAuthPanel() {
           disabled={submitting}
           className="mt-2 rounded-full border border-[var(--accent-strong)] bg-[var(--accent)] px-6 py-4 text-sm font-bold uppercase tracking-[0.2em] text-[#101722] shadow-[0_18px_40px_rgba(223,191,122,0.18)] transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-55"
         >
-          {submitting ? 'Chargement...' : isSignup ? 'Creer mon compte' : 'Se connecter'}
+          {submitting ? 'Chargement...' : isSignup ? 'Créer mon compte' : 'Se connecter'}
         </button>
 
           {!isSignup ? (
