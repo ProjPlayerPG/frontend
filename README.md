@@ -65,6 +65,7 @@ npm run start
 - [Référence SQL Supabase consolidée](docs/supabase-setup.sql)
 - [Fonctionnalités](docs/features.md)
 - [Tests et couverture](docs/tests.md)
+- [Déploiement Vercel, Render et CI/CD](docs/deployment.md)
 
 ## Documentation services
 
