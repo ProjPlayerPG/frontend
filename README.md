@@ -69,7 +69,7 @@ npm run start
 
 ## Documentation services
 
-- [game_service](../../game_service/game_service/README.md)
+- [game_service](https://github.com/ProjPlayerPG/game_service/blob/main/README.md)
 
 ## Notes importantes
 
