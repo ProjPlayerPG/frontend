@@ -5,6 +5,10 @@ import GameTranslationToggle from '@/components/games/gameTranslationToggle'
 import GameProvenanceBadge, {
   type GameProvenance,
 } from '@/components/games/gameProvenanceBadge'
+import {
+  gameDetailsHref,
+  normalizeGamesReturnTo,
+} from '@/lib/catalogFilters'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 
 type Game = {
@@ -62,14 +66,25 @@ export default async function GameDetails({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ from?: string | string[] }>
+  searchParams: Promise<{
+    from?: string | string[]
+    returnTo?: string | string[]
+  }>
 }) {
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams])
   const fromChatbot = Array.isArray(resolvedSearchParams.from)
     ? resolvedSearchParams.from.includes('chatbot')
     : resolvedSearchParams.from === 'chatbot'
+  const rawReturnTo = Array.isArray(resolvedSearchParams.returnTo)
+    ? resolvedSearchParams.returnTo[0]
+    : resolvedSearchParams.returnTo
+  const catalogReturnTo = normalizeGamesReturnTo(rawReturnTo)
+  const returnsToFilteredCatalog = catalogReturnTo !== '/games'
   const gameHref = (gameId: number) =>
-    fromChatbot ? `/games/${gameId}?from=chatbot` : `/games/${gameId}`
+    gameDetailsHref(gameId, {
+      fromChatbot,
+      returnTo: rawReturnTo ? catalogReturnTo : undefined,
+    })
   const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
   const url = `${baseUrl}/api/games/${id}`
   const res = await fetch(url, { cache: 'no-store' })
@@ -108,11 +123,11 @@ export default async function GameDetails({
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
       <div className="mb-6 flex flex-wrap items-center gap-4">
         <Link
-          href="/"
+          href={catalogReturnTo}
           className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.24em] text-[var(--accent-cool)] transition hover:text-[var(--foreground)]"
         >
           <span>←</span>
-          Retour à la liste
+          {returnsToFilteredCatalog ? 'Retour à la recherche' : 'Retour aux jeux'}
         </Link>
         {fromChatbot ? (
           <Link

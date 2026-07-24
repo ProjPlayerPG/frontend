@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   filtersFromSearchParams,
+  gameDetailsHref,
   gameSearchHref,
+  gamesCatalogHref,
+  normalizeGamesReturnTo,
   normalizeGameSearchQuery,
 } from '@/lib/catalogFilters'
 
@@ -85,5 +88,48 @@ describe('navigation de recherche', () => {
   it('revient au catalogue lorsque la recherche est trop courte', () => {
     expect(gameSearchHref('D')).toBe('/games')
     expect(gameSearchHref('   ')).toBe('/games')
+  })
+})
+
+describe('navigation entre le catalogue et une fiche', () => {
+  it('conserve la recherche et la page dans le lien de retour', () => {
+    const returnTo = gamesCatalogHref(
+      filtersFromSearchParams({ q: 'Dragon Quest', page: '3' }),
+    )
+
+    expect(returnTo).toBe('/games?q=Dragon+Quest&page=3')
+    expect(gameDetailsHref(42, { returnTo })).toBe(
+      '/games/42?returnTo=%2Fgames%3Fq%3DDragon%2BQuest%26page%3D3',
+    )
+  })
+
+  it('conserve les filtres et le tri du catalogue', () => {
+    expect(
+      gamesCatalogHref(
+        filtersFromSearchParams({
+          tag: 'Strategy',
+          platform: 'Nintendo Switch',
+          releaseYear: '2024',
+          sort: 'name_asc',
+          page: '2',
+        }),
+      ),
+    ).toBe(
+      '/games?tag=Strategy&platform=Nintendo+Switch&releaseYear=2024&sort=name_asc&page=2',
+    )
+  })
+
+  it('refuse une destination de retour externe ou une fiche de jeu', () => {
+    expect(normalizeGamesReturnTo('https://example.com/games?q=Pokemon')).toBe('/games')
+    expect(normalizeGamesReturnTo('/games/8353?q=Pokemon')).toBe('/games')
+  })
+
+  it('peut conserver simultanement le retour au chatbot et au catalogue', () => {
+    expect(
+      gameDetailsHref(8353, {
+        fromChatbot: true,
+        returnTo: '/games?q=Pokemon',
+      }),
+    ).toBe('/games/8353?from=chatbot&returnTo=%2Fgames%3Fq%3DPokemon')
   })
 })

@@ -44,6 +44,62 @@ export function gameSearchHref(value: SearchParamValue | string) {
   return query.length >= 2 ? `/games?q=${encodeURIComponent(query)}` : '/games'
 }
 
+export function gamesCatalogHref(filters: GamesFilters) {
+  const params = new URLSearchParams()
+
+  if (filters.query) {
+    params.set('q', filters.query)
+  } else {
+    if (filters.tag) params.set('tag', filters.tag)
+    if (filters.platform) params.set('platform', filters.platform)
+    if (filters.releaseYear) params.set('releaseYear', filters.releaseYear)
+    if (filters.sort !== 'release_desc') params.set('sort', filters.sort)
+  }
+
+  if (filters.page > 0) {
+    params.set('page', String(filters.page + 1))
+  }
+
+  return `/games${params.size ? `?${params.toString()}` : ''}`
+}
+
+export function normalizeGamesReturnTo(value: SearchParamValue | string) {
+  const candidate = String(firstValue(value) ?? '')
+
+  if (!candidate.startsWith('/games') || candidate.startsWith('//')) {
+    return '/games'
+  }
+
+  try {
+    const url = new URL(candidate, 'https://playerpg.local')
+
+    if (url.origin !== 'https://playerpg.local' || url.pathname !== '/games') {
+      return '/games'
+    }
+
+    return gamesCatalogHref(filtersFromSearchParams(Object.fromEntries(url.searchParams)))
+  } catch {
+    return '/games'
+  }
+}
+
+export function gameDetailsHref(
+  gameId: number | string,
+  options: { fromChatbot?: boolean; returnTo?: string } = {},
+) {
+  const params = new URLSearchParams()
+
+  if (options.fromChatbot) {
+    params.set('from', 'chatbot')
+  }
+
+  if (options.returnTo) {
+    params.set('returnTo', normalizeGamesReturnTo(options.returnTo))
+  }
+
+  return `/games/${gameId}${params.size ? `?${params.toString()}` : ''}`
+}
+
 export function filtersFromSearchParams(searchParams: GamesSearchParams = {}): GamesFilters {
   const query = normalizeGameSearchQuery(searchParams.q)
 
