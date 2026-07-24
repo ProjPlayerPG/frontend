@@ -1,33 +1,41 @@
 'use client'
 
 import Link from 'next/link'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
+import {
+  loadChatbotHistory,
+  saveChatbotHistory,
+  type ChatbotRecommendation,
+} from '@/lib/chatbotPersistence'
 import { normalizeBaseUrl } from '@/lib/igdb'
 import { supabase } from '@/lib/supabaseClient'
 
-type Recommendation = {
-  id: number
-  name: string
-  reason: string
-}
-
 export default function RpgChatbot() {
   const [message, setMessage] = useState('')
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [recommendations, setRecommendations] = useState<ChatbotRecommendation[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    const history = loadChatbotHistory()
+    if (!history) return
+
+    setMessage(history.message)
+    setRecommendations(history.recommendations)
+  }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (message.trim().length < 3) {
+    const query = message.trim()
+
+    if (query.length < 3) {
       setError('Dis-moi quel type de RPG tu cherches.')
       return
     }
 
     setLoading(true)
     setError('')
-    setRecommendations([])
 
     try {
       const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
@@ -40,7 +48,7 @@ export default function RpgChatbot() {
             ? { Authorization: `Bearer ${sessionData.session.access_token}` }
             : {}),
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message: query }),
       })
 
       if (!response.ok) {
@@ -48,8 +56,12 @@ export default function RpgChatbot() {
         throw new Error(data?.details || data?.error || 'Recommandation indisponible.')
       }
 
-      const data = (await response.json()) as { recommendations?: Recommendation[] }
-      setRecommendations(data.recommendations ?? [])
+      const data = (await response.json()) as { recommendations?: ChatbotRecommendation[] }
+      const nextRecommendations = data.recommendations ?? []
+
+      setMessage(query)
+      setRecommendations(nextRecommendations)
+      saveChatbotHistory({ message: query, recommendations: nextRecommendations })
     } catch (chatError) {
       setError(chatError instanceof Error ? chatError.message : 'Recommandation indisponible.')
     } finally {
@@ -109,7 +121,7 @@ export default function RpgChatbot() {
                     <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{recommendation.reason}</p>
                   </div>
                   <Link
-                    href={`/games/${recommendation.id}`}
+                    href={`/games/${recommendation.id}?from=chatbot`}
                     className="rounded-full border border-[var(--line-strong)] bg-white/6 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:bg-[var(--accent)]/12"
                   >
                     Voir

@@ -55,10 +55,17 @@ function compactList(items: string[], fallback: string) {
 
 export default async function GameDetails({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string | string[] }>
 }) {
-  const { id } = await params
+  const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams])
+  const fromChatbot = Array.isArray(resolvedSearchParams.from)
+    ? resolvedSearchParams.from.includes('chatbot')
+    : resolvedSearchParams.from === 'chatbot'
+  const gameHref = (gameId: number) =>
+    fromChatbot ? `/games/${gameId}?from=chatbot` : `/games/${gameId}`
   const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
   const url = `${baseUrl}/api/games/${id}`
   const res = await fetch(url, { cache: 'no-store' })
@@ -103,9 +110,18 @@ export default async function GameDetails({
           <span>←</span>
           Retour à la liste
         </Link>
+        {fromChatbot ? (
+          <Link
+            href="/chatbot"
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-strong)] bg-[var(--accent)]/12 px-4 py-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--accent)] transition hover:border-[var(--accent)] hover:bg-[var(--accent)]/20 hover:text-[var(--foreground)]"
+          >
+            <span aria-hidden="true">←</span>
+            Retour au Guide RPG
+          </Link>
+        ) : null}
         {game.parent_game?.id ? (
           <Link
-            href={`/games/${game.parent_game.id}`}
+            href={gameHref(game.parent_game.id)}
             className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-strong)] bg-[var(--accent)]/12 px-4 py-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--accent)] transition hover:border-[var(--accent)] hover:bg-[var(--accent)]/20 hover:text-[var(--foreground)]"
           >
             <span aria-hidden="true">{'<'}</span>
@@ -225,7 +241,7 @@ export default async function GameDetails({
                     return (
                       <Link
                         key={related.id}
-                        href={`/games/${related.id}`}
+                        href={gameHref(related.id)}
                         className="flex items-center gap-3 rounded-[1rem] border border-[var(--line)] bg-white/5 p-3 transition hover:border-[var(--line-strong)] hover:bg-white/8"
                       >
                         <div className="flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[0.8rem] border border-[var(--line)] bg-black/18">
