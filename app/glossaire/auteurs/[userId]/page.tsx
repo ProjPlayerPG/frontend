@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic'
 
 type PageProps = {
   params: Promise<{ userId: string }>
+  searchParams: Promise<{ from?: string | string[] }>
 }
 
 type Author = {
@@ -50,8 +51,11 @@ async function getAuthorProfile(userId: string) {
   }
 }
 
-export default async function GlossaryAuthorPage({ params }: PageProps) {
-  const { userId } = await params
+export default async function GlossaryAuthorPage({ params, searchParams }: PageProps) {
+  const [{ userId }, resolvedSearchParams] = await Promise.all([params, searchParams])
+  const fromAdmin = Array.isArray(resolvedSearchParams.from)
+    ? resolvedSearchParams.from.includes('admin')
+    : resolvedSearchParams.from === 'admin'
   const payload = await getAuthorProfile(userId)
 
   if (!payload) {
@@ -63,10 +67,10 @@ export default async function GlossaryAuthorPage({ params }: PageProps) {
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <Link
-        href="/glossaire"
+        href={fromAdmin ? '/admin' : '/glossaire'}
         className="inline-flex text-xs font-bold uppercase tracking-[0.22em] text-[var(--muted)] transition hover:text-[var(--accent)]"
       >
-        Retour au glossaire
+        {fromAdmin ? 'Retour à l’administration' : 'Retour au glossaire'}
       </Link>
 
       <section className="panel mt-6 rounded-[2rem] p-6 sm:p-8">
@@ -115,6 +119,7 @@ export default async function GlossaryAuthorPage({ params }: PageProps) {
                 slug={entry.slug}
                 title={entry.title}
                 description={entry.short_description}
+                fromAdmin={fromAdmin}
               />
             ))}
           </div>
