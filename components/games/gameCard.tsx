@@ -4,6 +4,7 @@ import Link from 'next/link'
 import GameProvenanceBadge, {
   type GameProvenance,
 } from '@/components/games/gameProvenanceBadge'
+import { gameDetailsHref } from '@/lib/catalogFilters'
 
 type Game = {
   id: number
@@ -19,14 +20,20 @@ function formatReleaseYear(timestamp?: number) {
   return new Date(timestamp * 1000).getFullYear()
 }
 
-export default function GameCard({ game }: { game: Game }) {
+export default function GameCard({
+  game,
+  returnTo,
+}: {
+  game: Game
+  returnTo?: string
+}) {
   const coverUrl = igdbUrlWithSize(game.cover?.url, 't_cover_big')
   const releaseYear = formatReleaseYear(game.first_release_date)
   const genres = game.genres?.slice(0, 2).map((genre) => genre.name) ?? []
 
   return (
     <Link
-      href={`/games/${game.id}`}
+      href={gameDetailsHref(game.id, { returnTo })}
       className="panel group flex w-full flex-col gap-5 overflow-hidden rounded-[1.75rem] p-4 text-left transition duration-300 hover:-translate-y-1 hover:border-[var(--line-strong)] sm:flex-row sm:items-center sm:p-5"
     >
       <div className="relative h-56 w-full overflow-hidden rounded-[1.35rem] border border-[var(--line)] bg-white/8 sm:h-36 sm:w-28 sm:shrink-0">

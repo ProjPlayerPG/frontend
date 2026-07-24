@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { gameSearchHref, normalizeGameSearchQuery } from '@/lib/catalogFilters'
+import {
+  gameDetailsHref,
+  gameSearchHref,
+  normalizeGameSearchQuery,
+} from '@/lib/catalogFilters'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 import GameProvenanceBadge, {
   type GameProvenance,
@@ -28,21 +32,36 @@ export default function GameSearchBar({
   const [results, setResults] = useState<SearchGame[]>([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [suggestionsEnabled, setSuggestionsEnabled] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestRef = useRef<AbortController | null>(null)
   const router = useRouter()
   const pathname = usePathname()
   const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
 
   useEffect(() => {
+    requestRef.current?.abort()
+    requestRef.current = null
     setSearch(pathname === '/games' ? normalizeGameSearchQuery(initialQuery) : '')
     setResults([])
     setOpen(false)
+    setSuggestionsEnabled(false)
+    setLoading(false)
     setError(null)
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
   }, [pathname, initialQuery])
 
   useEffect(() => {
+    if (!suggestionsEnabled) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      requestRef.current?.abort()
+      requestRef.current = null
+      setOpen(false)
+      setLoading(false)
+      return
+    }
+
     const query = search.trim()
 
     if (query.length < 2) {
@@ -56,6 +75,9 @@ export default function GameSearchBar({
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
 
     timeoutRef.current = setTimeout(async () => {
+      const controller = new AbortController()
+      requestRef.current?.abort()
+      requestRef.current = controller
       setLoading(true)
       setError(null)
 
@@ -65,32 +87,43 @@ export default function GameSearchBar({
         url.searchParams.set('limit', '10')
         url.searchParams.set('offset', '0')
 
-        const response = await fetch(url.toString(), { cache: 'no-store' })
+        const response = await fetch(url.toString(), {
+          cache: 'no-store',
+          signal: controller.signal,
+        })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
 
         const data = (await response.json()) as SearchGame[]
         setResults(data)
         setOpen(true)
       } catch (err) {
+        if (controller.signal.aborted) return
         console.error(err)
         setResults([])
         setOpen(false)
         setError('Erreur lors de la recherche')
       } finally {
-        setLoading(false)
+        if (requestRef.current === controller) {
+          requestRef.current = null
+          setLoading(false)
+        }
       }
     }, 280)
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      requestRef.current?.abort()
+      requestRef.current = null
     }
-  }, [search, baseUrl])
+  }, [search, baseUrl, suggestionsEnabled])
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const query = normalizeGameSearchQuery(search)
 
     if (!query) {
+      requestRef.current?.abort()
+      setSuggestionsEnabled(false)
       setOpen(false)
       setResults([])
       setError(null)
@@ -99,6 +132,8 @@ export default function GameSearchBar({
     }
 
     if (query.length < 2) {
+      requestRef.current?.abort()
+      setSuggestionsEnabled(false)
       setOpen(false)
       setResults([])
       setError('Saisis au moins 2 caractères.')
@@ -106,8 +141,11 @@ export default function GameSearchBar({
     }
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    requestRef.current?.abort()
+    setSuggestionsEnabled(false)
     setOpen(false)
     setResults([])
+    setLoading(false)
     setError(null)
     router.push(gameSearchHref(query))
   }
@@ -136,7 +174,10 @@ export default function GameSearchBar({
             <input
               className={`w-full bg-transparent text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]/85 ${compact ? 'text-sm leading-8' : 'mt-1 text-lg'}`}
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSuggestionsEnabled(true)
+                setSearch(event.target.value)
+              }}
               aria-label="Rechercher un jeu"
               autoComplete="off"
               placeholder={compact ? 'Rechercher...' : 'Titre...'}
@@ -159,10 +200,16 @@ export default function GameSearchBar({
                   key={game.id}
                   type="button"
                   onClick={() => {
+                    requestRef.current?.abort()
+                    setSuggestionsEnabled(false)
                     setOpen(false)
                     setSearch('')
                     setResults([])
-                    router.push(`/games/${game.id}`)
+                    const returnTo =
+                      pathname === '/games'
+                        ? `${pathname}${window.location.search}`
+                        : undefined
+                    router.push(gameDetailsHref(game.id, { returnTo }))
                   }}
                   className="flex w-full items-center gap-4 rounded-[1.1rem] px-3 py-3 text-left transition hover:bg-white/6"
                 >
