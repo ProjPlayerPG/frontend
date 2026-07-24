@@ -1,6 +1,9 @@
 import { igdbUrlWithSize } from '@/lib/igdb'
 import Image from 'next/image'
 import Link from 'next/link'
+import GameProvenanceBadge, {
+  type GameProvenance,
+} from '@/components/games/gameProvenanceBadge'
 
 type Game = {
   id: number
@@ -8,6 +11,7 @@ type Game = {
   cover?: { url?: string }
   genres?: { name: string }[]
   first_release_date?: number
+  provenance?: GameProvenance
 }
 
 function formatReleaseYear(timestamp?: number) {
@@ -45,6 +49,7 @@ export default function GameCard({ game }: { game: Game }) {
         <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">
           <span>Chronique</span>
           {releaseYear ? <span>{releaseYear}</span> : null}
+          <GameProvenanceBadge provenance={game.provenance} compact />
         </div>
 
         <h3 className="font-display mt-3 text-3xl leading-none text-[var(--foreground)] sm:text-[2.1rem]">
