@@ -7,6 +7,7 @@ import {
   type GamesSearchParams,
 } from '@/lib/catalogFilters'
 import { normalizeBaseUrl } from '@/lib/igdb'
+import type { GameProvenance } from '@/components/games/gameProvenanceBadge'
 
 type Game = {
   id: number
@@ -15,6 +16,7 @@ type Game = {
   genres?: { name: string }[]
   platforms?: { name: string }[]
   first_release_date?: number
+  provenance?: GameProvenance
 }
 
 export type { GamesSearchParams } from '@/lib/catalogFilters'

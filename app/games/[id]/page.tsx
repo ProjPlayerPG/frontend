@@ -2,6 +2,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import FavoriteButton from '@/components/games/favoriteButton'
 import GameTranslationToggle from '@/components/games/gameTranslationToggle'
+import GameProvenanceBadge, {
+  type GameProvenance,
+} from '@/components/games/gameProvenanceBadge'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 
 type Game = {
@@ -19,6 +22,7 @@ type Game = {
   }[]
   cover?: { id?: number; url?: string }
   first_release_date?: number
+  provenance?: GameProvenance
   parent_game?: {
     id: number
     name: string
@@ -175,6 +179,9 @@ export default async function GameDetails({
             <p className="font-display text-sm uppercase tracking-[0.34em] text-[var(--accent)]">
               Fiche de jeu
             </p>
+            <div className="mt-3">
+              <GameProvenanceBadge provenance={game.provenance} />
+            </div>
             <h1 className="font-display mt-4 text-5xl leading-none text-[var(--foreground)] sm:text-6xl">
               {game.name}
             </h1>

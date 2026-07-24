@@ -6,11 +6,15 @@ import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { gameSearchHref, normalizeGameSearchQuery } from '@/lib/catalogFilters'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
+import GameProvenanceBadge, {
+  type GameProvenance,
+} from '@/components/games/gameProvenanceBadge'
 
 type SearchGame = {
   id: number
   name: string
   cover?: { url?: string }
+  provenance?: GameProvenance
 }
 
 export default function GameSearchBar({
@@ -185,6 +189,9 @@ export default function GameSearchBar({
                     <p className="mt-2 text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">
                       Voir les détails
                     </p>
+                    <div className="mt-2">
+                      <GameProvenanceBadge provenance={game.provenance} compact />
+                    </div>
                   </div>
                 </button>
               )
