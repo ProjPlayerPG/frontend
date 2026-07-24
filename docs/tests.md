@@ -38,7 +38,11 @@ Les tests couvrent actuellement :
 - la normalisation des filtres et des tris IGDB ;
 - le calcul des bornes annuelles et l'échappement des recherches ;
 - l'extraction des termes de recommandation ;
-- la déduplication et le classement des candidats ;
+- la détection et l'exclusion des jeux utilisés comme références, de leurs éditions
+  et de leur licence ;
+- la déduplication et le classement des candidats selon les genres secondaires,
+  thèmes et mots-clés distinctifs ;
+- l'élargissement contrôlé des concepts spécialisés, comme la collection de monstres ;
 - la validation des recommandations retournées par Mistral ;
 - la détection d'un cache de traduction absent, partiel ou identique au texte original.
 
