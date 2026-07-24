@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic'
 
 type PageProps = {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ from?: string | string[] }>
 }
 
 type GlossaryEntry = {
@@ -111,8 +112,13 @@ async function getGlossaryEntry(slug: string) {
   }
 }
 
-export default async function GlossaryDetailPage({ params }: PageProps) {
-  const { slug } = await params
+export default async function GlossaryDetailPage({ params, searchParams }: PageProps) {
+  const [{ slug }, resolvedSearchParams] = await Promise.all([params, searchParams])
+  const fromAdmin = Array.isArray(resolvedSearchParams.from)
+    ? resolvedSearchParams.from.includes('admin')
+    : resolvedSearchParams.from === 'admin'
+  const glossaryEntryHref = (entrySlug: string) =>
+    `/glossaire/${entrySlug}${fromAdmin ? '?from=admin' : ''}`
   const payload = await getGlossaryEntry(slug)
 
   if (!payload) {
@@ -124,10 +130,10 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <Link
-        href="/glossaire"
+        href={fromAdmin ? '/admin' : '/glossaire'}
         className="inline-flex text-xs font-bold uppercase tracking-[0.22em] text-[var(--muted)] transition hover:text-[var(--accent)]"
       >
-        ← Retour au glossaire
+        ← {fromAdmin ? 'Retour à l’administration' : 'Retour au glossaire'}
       </Link>
 
       <article className="panel mt-6 rounded-[2rem] p-6 sm:p-8 lg:p-10">
@@ -156,7 +162,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                   Proposé par
                 </h2>
                 <Link
-                  href={`/glossaire/auteurs/${author.user_id}`}
+                  href={`/glossaire/auteurs/${author.user_id}${fromAdmin ? '?from=admin' : ''}`}
                   className="mt-4 flex items-center gap-3 rounded-[1rem] border border-[var(--line)] bg-white/5 p-3 transition hover:border-[var(--line-strong)]"
                 >
                   <span
@@ -191,7 +197,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                     {otherEntries.map((otherEntry) => (
                       <Link
                         key={otherEntry.id}
-                        href={`/glossaire/${otherEntry.slug}`}
+                        href={glossaryEntryHref(otherEntry.slug)}
                         className="rounded-[0.9rem] border border-[var(--line)] bg-black/12 px-3 py-2 text-sm text-[var(--muted)] transition hover:text-[var(--foreground)]"
                       >
                         {otherEntry.title}

@@ -82,16 +82,13 @@ export async function GET(request: Request) {
     const { data: entries, error: entriesError } = await admin
       .from('glossary_entries')
       .select('id, slug, title, short_description, detailed_description, status, author_id, created_at')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
 
     if (entriesError) {
       return serverError(entriesError.message)
     }
 
     const entryIds = (entries ?? []).map((entry) => entry.id)
-    const authorIds = Array.from(new Set((entries ?? []).map((entry) => entry.author_id).filter(Boolean)))
-
     const { data: games, error: gamesError } = entryIds.length
       ? await admin
           .from('glossary_entry_games')
@@ -116,20 +113,17 @@ export async function GET(request: Request) {
       return serverError(sourcesError.message)
     }
 
-    const { data: authors, error: authorsError } = authorIds.length
-      ? await admin.from('profiles').select('user_id, username, email').in('user_id', authorIds)
-      : { data: [], error: null }
-
-    if (authorsError) {
-      return serverError(authorsError.message)
-    }
+    const pendingEntries = (entries ?? [])
+      .filter((entry) => entry.status === 'pending')
+      .sort((first, second) => first.created_at.localeCompare(second.created_at))
 
     return Response.json({
       profiles: profiles ?? [],
-      pendingEntries: entries ?? [],
+      pendingEntries,
+      allEntries: entries ?? [],
       entryGames: games ?? [],
       entrySources: sources ?? [],
-      authors: authors ?? [],
+      authors: profiles ?? [],
     })
   } catch (error) {
     return serverError(error instanceof Error ? error.message : 'Erreur admin inconnue.')
@@ -213,6 +207,38 @@ export async function PATCH(request: Request) {
     }
 
     return serverError('Action admin inconnue.', 400)
+  } catch (error) {
+    return serverError(error instanceof Error ? error.message : 'Erreur admin inconnue.')
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const auth = await requireAdmin(request)
+    if (auth.error) return auth.error
+
+    const body = (await request.json()) as { entryId?: unknown }
+
+    if (typeof body.entryId !== 'string' || !body.entryId.trim()) {
+      return serverError('Publication invalide.', 400)
+    }
+
+    const { data, error } = await auth.admin
+      .from('glossary_entries')
+      .delete()
+      .eq('id', body.entryId)
+      .select('id, title, status')
+      .maybeSingle()
+
+    if (error) {
+      return serverError(error.message)
+    }
+
+    if (!data) {
+      return serverError('Publication introuvable.', 404)
+    }
+
+    return Response.json({ entry: data })
   } catch (error) {
     return serverError(error instanceof Error ? error.message : 'Erreur admin inconnue.')
   }

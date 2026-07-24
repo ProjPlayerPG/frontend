@@ -4,12 +4,18 @@ type GlossaryCardProps = {
   slug: string
   title: string
   description: string
+  fromAdmin?: boolean
 }
 
-export default function GlossaryCard({ slug, title, description }: GlossaryCardProps) {
+export default function GlossaryCard({
+  slug,
+  title,
+  description,
+  fromAdmin = false,
+}: GlossaryCardProps) {
   return (
     <Link
-      href={`/glossaire/${slug}`}
+      href={`/glossaire/${slug}${fromAdmin ? '?from=admin' : ''}`}
       className="panel group block rounded-[1.5rem] p-6 transition hover:-translate-y-1 hover:border-[var(--line-strong)] hover:bg-white/[0.02]"
     >
       <article>
