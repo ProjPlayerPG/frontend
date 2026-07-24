@@ -3,6 +3,7 @@ import GameCard from '@/components/games/gameCard'
 import GamesCatalogControls, { GamesPagination } from '@/components/games/gamesCatalogControls'
 import {
   filtersFromSearchParams,
+  gamesCatalogHref,
   type GamesFilters,
   type GamesSearchParams,
 } from '@/lib/catalogFilters'
@@ -56,6 +57,7 @@ export default async function GamesCatalog({
   const games = fetchedGames.slice(0, PAGE_SIZE)
   const canGoBack = filters.page > 0
   const canGoForward = fetchedGames.length > PAGE_SIZE
+  const returnTo = gamesCatalogHref(filters)
 
   return (
     <div className="grid gap-5">
@@ -85,7 +87,7 @@ export default async function GamesCatalog({
       )}
 
       {games.map((game) => (
-        <GameCard key={game.id} game={game} />
+        <GameCard key={game.id} game={game} returnTo={returnTo} />
       ))}
 
       {games.length > 0 ? (
