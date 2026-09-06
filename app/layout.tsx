@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Space_Grotesk } from "next/font/google";
 import SiteHeader from "@/components/layout/siteHeader";
+import SiteFooter from "@/components/layout/siteFooter";
 import "./globals.css";
 
 const displayFont = Cormorant_Garamond({
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <SiteHeader />
         {children}
+        <SiteFooter />
       </body>
     </html>
   );

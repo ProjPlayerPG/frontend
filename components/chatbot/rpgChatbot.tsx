@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import {
   loadChatbotHistory,
   saveChatbotHistory,
@@ -10,30 +10,41 @@ import {
 import { normalizeBaseUrl } from '@/lib/igdb'
 import { supabase } from '@/lib/supabaseClient'
 
+const requiredPromptPrefix = 'Je veux'
+
+function promptCompletion(value: string) {
+  return value.trim().replace(/^je\s+veux\b[\s,:-]*/i, '')
+}
+
 export default function RpgChatbot() {
   const [message, setMessage] = useState('')
   const [recommendations, setRecommendations] = useState<ChatbotRecommendation[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const requestInFlight = useRef(false)
 
   useEffect(() => {
     const history = loadChatbotHistory()
     if (!history) return
 
-    setMessage(history.message)
+    setMessage(promptCompletion(history.message))
     setRecommendations(history.recommendations)
   }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const query = message.trim()
+    if (requestInFlight.current) return
 
-    if (query.length < 3) {
-      setError('Dis-moi quel type de RPG tu cherches.')
+    const completion = promptCompletion(message)
+    const query = `${requiredPromptPrefix} ${completion}`.trim()
+
+    if (completion.length < 3) {
+      setError('Complète la phrase pour décrire le RPG que tu cherches.')
       return
     }
 
+    requestInFlight.current = true
     setLoading(true)
     setError('')
 
@@ -59,12 +70,13 @@ export default function RpgChatbot() {
       const data = (await response.json()) as { recommendations?: ChatbotRecommendation[] }
       const nextRecommendations = data.recommendations ?? []
 
-      setMessage(query)
+      setMessage(completion)
       setRecommendations(nextRecommendations)
       saveChatbotHistory({ message: query, recommendations: nextRecommendations })
     } catch (chatError) {
       setError(chatError instanceof Error ? chatError.message : 'Recommandation indisponible.')
     } finally {
+      requestInFlight.current = false
       setLoading(false)
     }
   }
@@ -87,12 +99,18 @@ export default function RpgChatbot() {
 
       <div className="panel mt-6 rounded-[1.5rem] p-5">
         <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-[1fr_auto]">
-          <input
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            className="rounded-[1.1rem] border border-[var(--line)] bg-black/18 px-4 py-3 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/60 focus:border-[var(--accent)]"
-            placeholder="Ex. : je veux un tactical RPG récent avec une bonne histoire"
-          />
+          <label className="flex min-w-0 items-center rounded-[1.1rem] border border-[var(--line)] bg-black/18 transition focus-within:border-[var(--accent)]">
+            <span className="shrink-0 border-r border-[var(--line)] px-4 py-3 font-medium text-[var(--accent)]">
+              {requiredPromptPrefix}
+            </span>
+            <input
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              aria-label="Compléter la demande commençant par Je veux"
+              className="min-w-0 flex-1 bg-transparent px-4 py-3 text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]/60"
+              placeholder="un tactical RPG récent avec une bonne histoire"
+            />
+          </label>
           <button
             type="submit"
             disabled={loading}

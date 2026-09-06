@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { gameDetailsHref } from '@/lib/catalogFilters'
 import { createSupabaseAdminClient } from '@/lib/server/supabaseAdmin'
 
 export const dynamic = 'force-dynamic'
@@ -247,7 +248,9 @@ export default async function GlossaryDetailPage({ params, searchParams }: PageP
             {games.map((game) => (
               <Link
                 key={game.id}
-                href={`/games/${game.igdb_game_id}`}
+                href={gameDetailsHref(game.igdb_game_id, {
+                  fromGlossary: { slug: entry.slug, title: entry.title },
+                })}
                 className="panel group flex gap-4 rounded-[1.5rem] p-4 transition hover:-translate-y-1 hover:border-[var(--line-strong)]"
               >
                 <div className="flex h-28 w-22 shrink-0 items-center justify-center overflow-hidden rounded-[1rem] border border-[var(--line)] bg-white/8">
