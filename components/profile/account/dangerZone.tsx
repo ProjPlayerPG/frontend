@@ -9,6 +9,8 @@ export default function DangerZone({ account }: { account: ProfileAccountControl
       </p>
       <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
         <input
+          name="deleteConfirmation"
+          autoComplete="off"
           value={account.deleteConfirmation}
           onChange={(event) => account.setDeleteConfirmation(event.target.value)}
           className="rounded-[1.1rem] border border-red-300/25 bg-black/18 px-4 py-3 text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)]/60 focus:border-red-200"

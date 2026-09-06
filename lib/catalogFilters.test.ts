@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   filtersFromSearchParams,
   gameDetailsHref,
+  gamesByCompanyHref,
+  gamesByPlatformHref,
   gameSearchHref,
   gamesCatalogHref,
   normalizeGamesReturnTo,
@@ -93,6 +95,27 @@ describe('navigation de recherche', () => {
 })
 
 describe('navigation entre le catalogue et une fiche', () => {
+  it('construit les filtres depuis les métadonnées cliquables d’un jeu', () => {
+    expect(gamesByPlatformHref({ id: 48, name: 'PlayStation 4' })).toBe(
+      '/games?platformId=48&platformName=PlayStation+4',
+    )
+    expect(gamesByCompanyHref({ id: 101, name: 'FromSoftware' }, 'developer')).toBe(
+      '/games?companyId=101&companyName=FromSoftware&companyRole=developer',
+    )
+  })
+
+  it('conserve un filtre de studio dans le lien de retour', () => {
+    const filters = filtersFromSearchParams({
+      companyId: '101',
+      companyName: 'FromSoftware',
+      companyRole: 'developer',
+    })
+
+    expect(gamesCatalogHref(filters)).toBe(
+      '/games?companyId=101&companyName=FromSoftware&companyRole=developer',
+    )
+  })
+
   it('conserve la recherche et la page dans le lien de retour', () => {
     const returnTo = gamesCatalogHref(
       filtersFromSearchParams({ q: 'Dragon Quest', page: '3' }),

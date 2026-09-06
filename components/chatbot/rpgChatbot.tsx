@@ -104,6 +104,8 @@ export default function RpgChatbot() {
               {requiredPromptPrefix}
             </span>
             <input
+              name="recommendationPrompt"
+              autoComplete="off"
               value={message}
               onChange={(event) => setMessage(event.target.value)}
               aria-label="Compléter la demande commençant par Je veux"

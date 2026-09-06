@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   CHATBOT_HISTORY_STORAGE_KEY,
+  CHATBOT_HISTORY_TTL_MS,
   loadChatbotHistory,
   saveChatbotHistory,
   type ChatbotHistory,
@@ -23,9 +24,23 @@ describe('chatbotPersistence', () => {
   })
 
   it('restores the last successful search', () => {
-    saveChatbotHistory(history)
+    saveChatbotHistory(history, localStorage, 1_000)
 
-    expect(loadChatbotHistory()).toEqual(history)
+    expect(loadChatbotHistory(localStorage, 1_000 + CHATBOT_HISTORY_TTL_MS - 1)).toEqual(history)
+  })
+
+  it('expires and removes a search after 24 hours', () => {
+    saveChatbotHistory(history, localStorage, 1_000)
+
+    expect(loadChatbotHistory(localStorage, 1_000 + CHATBOT_HISTORY_TTL_MS)).toBeNull()
+    expect(localStorage.getItem(CHATBOT_HISTORY_STORAGE_KEY)).toBeNull()
+  })
+
+  it('removes history created before expiration dates were introduced', () => {
+    localStorage.setItem(CHATBOT_HISTORY_STORAGE_KEY, JSON.stringify(history))
+
+    expect(loadChatbotHistory(localStorage, 1_000)).toBeNull()
+    expect(localStorage.getItem(CHATBOT_HISTORY_STORAGE_KEY)).toBeNull()
   })
 
   it('ignores and removes malformed history', () => {

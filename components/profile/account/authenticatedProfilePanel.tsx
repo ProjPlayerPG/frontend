@@ -43,6 +43,7 @@ export default function AuthenticatedProfilePanel({ account }: { account: Profil
                 {account.uploadingAvatar ? 'Envoi...' : 'Changer avatar'}
                 <input
                   type="file"
+                  name="avatar"
                   accept="image/png,image/jpeg,image/webp"
                   onChange={account.handleAvatarChange}
                   disabled={account.uploadingAvatar}

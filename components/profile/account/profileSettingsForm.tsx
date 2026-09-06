@@ -14,6 +14,8 @@ export default function ProfileSettingsForm({ account }: { account: ProfileAccou
         <label className="grid gap-2 text-sm font-medium text-[var(--muted)]">
           Pseudo
           <input
+            name="username"
+            autoComplete="username"
             value={account.profileUsernameInput}
             onChange={(event) => account.setProfileUsernameInput(event.target.value)}
             minLength={3}
@@ -27,6 +29,8 @@ export default function ProfileSettingsForm({ account }: { account: ProfileAccou
           E-mail
           <input
             type="email"
+            name="email"
+            autoComplete="email"
             value={account.profileEmailInput}
             onChange={(event) => account.setProfileEmailInput(event.target.value)}
             required
@@ -39,6 +43,8 @@ export default function ProfileSettingsForm({ account }: { account: ProfileAccou
         Nouveau mot de passe
         <input
           type="password"
+          name="newPassword"
+          autoComplete="new-password"
           value={account.newPassword}
           onChange={(event) => account.setNewPassword(event.target.value)}
           minLength={6}
