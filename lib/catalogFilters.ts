@@ -5,6 +5,11 @@ export type GamesFilters = {
   query: string
   tag: string
   platform: string
+  platformId?: string
+  platformName?: string
+  companyId?: string
+  companyName?: string
+  companyRole?: 'developer' | 'publisher' | ''
   releaseYear: string
   sort: string
 }
@@ -37,6 +42,23 @@ function pageFromSearchParams(value: SearchParamValue) {
   return Number.isInteger(page) && page > 0 ? page - 1 : 0
 }
 
+function positiveId(value: SearchParamValue | string) {
+  const id = Number(firstValue(value))
+  return Number.isInteger(id) && id > 0 ? String(id) : ''
+}
+
+function entityName(value: SearchParamValue | string) {
+  return String(firstValue(value) ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .slice(0, 100)
+}
+
+function companyRole(value: SearchParamValue): 'developer' | 'publisher' | '' {
+  const role = firstValue(value)
+  return role === 'developer' || role === 'publisher' ? role : ''
+}
+
 export function normalizeGameSearchQuery(value: SearchParamValue | string = '') {
   return String(firstValue(value) ?? '')
     .trim()
@@ -57,6 +79,15 @@ export function gamesCatalogHref(filters: GamesFilters) {
   } else {
     if (filters.tag) params.set('tag', filters.tag)
     if (filters.platform) params.set('platform', filters.platform)
+    if (filters.platformId) {
+      params.set('platformId', filters.platformId)
+      if (filters.platformName) params.set('platformName', filters.platformName)
+    }
+    if (filters.companyId) {
+      params.set('companyId', filters.companyId)
+      if (filters.companyName) params.set('companyName', filters.companyName)
+      if (filters.companyRole) params.set('companyRole', filters.companyRole)
+    }
     if (filters.releaseYear) params.set('releaseYear', filters.releaseYear)
     if (filters.sort !== 'release_desc') params.set('sort', filters.sort)
   }
@@ -66,6 +97,28 @@ export function gamesCatalogHref(filters: GamesFilters) {
   }
 
   return `/games${params.size ? `?${params.toString()}` : ''}`
+}
+
+export function gamesByPlatformHref(platform: { id: number; name: string }) {
+  const params = new URLSearchParams({
+    platformId: String(platform.id),
+    platformName: entityName(platform.name),
+  })
+
+  return `/games?${params.toString()}`
+}
+
+export function gamesByCompanyHref(
+  company: { id: number; name: string },
+  role: 'developer' | 'publisher',
+) {
+  const params = new URLSearchParams({
+    companyId: String(company.id),
+    companyName: entityName(company.name),
+    companyRole: role,
+  })
+
+  return `/games?${params.toString()}`
 }
 
 export function normalizeGamesReturnTo(value: SearchParamValue | string) {
@@ -140,12 +193,27 @@ export function gameDetailsHref(
 
 export function filtersFromSearchParams(searchParams: GamesSearchParams = {}): GamesFilters {
   const query = normalizeGameSearchQuery(searchParams.q)
+  const selectedPlatformId = positiveId(searchParams.platformId)
+  const selectedCompanyId = positiveId(searchParams.companyId)
 
   return {
     page: pageFromSearchParams(searchParams.page),
     query: query.length >= 2 ? query : '',
     tag: allowedValue(searchParams.tag, tagFilters),
-    platform: allowedValue(searchParams.platform, platformFilters),
+    platform: selectedPlatformId ? '' : allowedValue(searchParams.platform, platformFilters),
+    ...(selectedPlatformId
+      ? {
+          platformId: selectedPlatformId,
+          platformName: entityName(searchParams.platformName),
+        }
+      : {}),
+    ...(selectedCompanyId
+      ? {
+          companyId: selectedCompanyId,
+          companyName: entityName(searchParams.companyName),
+          companyRole: companyRole(searchParams.companyRole),
+        }
+      : {}),
     releaseYear: allowedValue(searchParams.releaseYear, releaseYearFilters),
     sort: allowedSort(searchParams.sort),
   }

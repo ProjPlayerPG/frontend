@@ -259,6 +259,7 @@ export default function GlossaryForm() {
           <label className="grid gap-2">
             <span className="text-sm font-bold text-[var(--muted)]">Titre</span>
             <input
+              name="title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               maxLength={90}
@@ -270,6 +271,7 @@ export default function GlossaryForm() {
           <label className="grid gap-2">
             <span className="text-sm font-bold text-[var(--muted)]">Description courte</span>
             <textarea
+              name="shortDescription"
               value={shortDescription}
               onChange={(event) => setShortDescription(event.target.value)}
               maxLength={220}
@@ -282,6 +284,7 @@ export default function GlossaryForm() {
           <label className="grid gap-2">
             <span className="text-sm font-bold text-[var(--muted)]">Description avancée</span>
             <textarea
+              name="detailedDescription"
               value={detailedDescription}
               onChange={(event) => setDetailedDescription(event.target.value)}
               rows={8}
@@ -301,6 +304,7 @@ export default function GlossaryForm() {
             {sources.map((source, index) => (
               <div key={index} className="grid gap-3 rounded-[1.2rem] border border-[var(--line)] bg-black/12 p-4 md:grid-cols-[0.8fr_1.4fr_auto]">
                 <input
+                  name={`sources.${index}.label`}
                   value={source.label}
                   onChange={(event) => updateSource(index, 'label', event.target.value)}
                   maxLength={80}
@@ -308,6 +312,9 @@ export default function GlossaryForm() {
                   placeholder="Label optionnel"
                 />
                 <input
+                  name={`sources.${index}.url`}
+                  type="url"
+                  autoComplete="url"
                   value={source.url}
                   onChange={(event) => updateSource(index, 'url', event.target.value)}
                   className="rounded-full border border-[var(--line)] bg-black/18 px-4 py-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
@@ -342,6 +349,8 @@ export default function GlossaryForm() {
 
             <div className="relative">
               <input
+                name="relatedGameSearch"
+                autoComplete="off"
                 value={gameQuery}
                 onChange={(event) => setGameQuery(event.target.value)}
                 className="w-full rounded-[1.2rem] border border-[var(--line)] bg-black/18 px-5 py-4 text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"

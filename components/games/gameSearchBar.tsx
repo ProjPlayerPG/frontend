@@ -172,6 +172,7 @@ export default function GameSearchBar({
               Rechercher un jeu
             </p>
             <input
+              name="gameSearch"
               className={`w-full bg-transparent text-[var(--foreground)] outline-none placeholder:text-[var(--muted)]/85 ${compact ? 'text-sm leading-8' : 'mt-1 text-lg'}`}
               value={search}
               onChange={(event) => {

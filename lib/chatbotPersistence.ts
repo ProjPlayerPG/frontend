@@ -10,6 +10,7 @@ export type ChatbotHistory = {
 }
 
 export const CHATBOT_HISTORY_STORAGE_KEY = 'playerpg:chatbot-history:v1'
+export const CHATBOT_HISTORY_TTL_MS = 24 * 60 * 60 * 1000
 
 type ReadableStorage = Pick<Storage, 'getItem' | 'removeItem'>
 type WritableStorage = Pick<Storage, 'setItem'>
@@ -47,6 +48,7 @@ function isRecommendation(value: unknown): value is ChatbotRecommendation {
 
 export function loadChatbotHistory(
   storage: ReadableStorage | null = browserStorage(),
+  now = Date.now(),
 ): ChatbotHistory | null {
   if (!storage) return null
 
@@ -54,11 +56,14 @@ export function loadChatbotHistory(
     const serializedHistory = storage.getItem(CHATBOT_HISTORY_STORAGE_KEY)
     if (!serializedHistory) return null
 
-    const history = JSON.parse(serializedHistory) as Partial<ChatbotHistory>
+    const history = JSON.parse(serializedHistory) as Partial<ChatbotHistory> & { savedAt?: number }
     if (
       typeof history.message !== 'string' ||
       !Array.isArray(history.recommendations) ||
-      !history.recommendations.every(isRecommendation)
+      !history.recommendations.every(isRecommendation) ||
+      typeof history.savedAt !== 'number' ||
+      !Number.isFinite(history.savedAt) ||
+      now - history.savedAt >= CHATBOT_HISTORY_TTL_MS
     ) {
       removeInvalidHistory(storage)
       return null
@@ -77,11 +82,12 @@ export function loadChatbotHistory(
 export function saveChatbotHistory(
   history: ChatbotHistory,
   storage: WritableStorage | null = browserStorage(),
+  now = Date.now(),
 ) {
   if (!storage) return
 
   try {
-    storage.setItem(CHATBOT_HISTORY_STORAGE_KEY, JSON.stringify(history))
+    storage.setItem(CHATBOT_HISTORY_STORAGE_KEY, JSON.stringify({ ...history, savedAt: now }))
   } catch {
     // A recommendation should remain usable even if browser storage is unavailable.
   }
