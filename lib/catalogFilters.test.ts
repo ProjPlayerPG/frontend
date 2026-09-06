@@ -6,6 +6,7 @@ import {
   gamesCatalogHref,
   normalizeGamesReturnTo,
   normalizeGameSearchQuery,
+  normalizeGlossaryReturnContext,
 } from '@/lib/catalogFilters'
 
 describe('filtersFromSearchParams', () => {
@@ -131,5 +132,22 @@ describe('navigation entre le catalogue et une fiche', () => {
         returnTo: '/games?q=Pokemon',
       }),
     ).toBe('/games/8353?from=chatbot&returnTo=%2Fgames%3Fq%3DPokemon')
+  })
+
+  it('conserve le terme du glossaire dans le parcours vers une fiche', () => {
+    expect(
+      gameDetailsHref(8353, {
+        fromGlossary: { slug: 'tour-par-tour', title: 'Tour par tour' },
+      }),
+    ).toBe('/games/8353?from=glossary&glossary=tour-par-tour&term=Tour+par+tour')
+  })
+
+  it('refuse un chemin de glossaire qui pourrait rediriger ailleurs', () => {
+    expect(normalizeGlossaryReturnContext('../admin', 'Administration')).toBeNull()
+    expect(
+      gameDetailsHref(8353, {
+        fromGlossary: { slug: '../admin', title: 'Administration' },
+      }),
+    ).toBe('/games/8353')
   })
 })

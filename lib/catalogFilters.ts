@@ -12,6 +12,11 @@ export type GamesFilters = {
 type SearchParamValue = string | string[] | undefined
 export type GamesSearchParams = Record<string, SearchParamValue>
 
+export type GlossaryReturnContext = {
+  slug: string
+  title: string
+}
+
 function firstValue(value: SearchParamValue) {
   return Array.isArray(value) ? value[0] : value
 }
@@ -83,14 +88,47 @@ export function normalizeGamesReturnTo(value: SearchParamValue | string) {
   }
 }
 
+export function normalizeGlossaryReturnContext(
+  slugValue: SearchParamValue | string,
+  titleValue: SearchParamValue | string,
+): GlossaryReturnContext | null {
+  const slug = String(firstValue(slugValue) ?? '').trim()
+
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(slug)) {
+    return null
+  }
+
+  const title = String(firstValue(titleValue) ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .slice(0, 80)
+
+  return { slug, title }
+}
+
 export function gameDetailsHref(
   gameId: number | string,
-  options: { fromChatbot?: boolean; returnTo?: string } = {},
+  options: {
+    fromChatbot?: boolean
+    fromGlossary?: GlossaryReturnContext
+    returnTo?: string
+  } = {},
 ) {
   const params = new URLSearchParams()
 
   if (options.fromChatbot) {
     params.set('from', 'chatbot')
+  } else if (options.fromGlossary) {
+    const glossaryContext = normalizeGlossaryReturnContext(
+      options.fromGlossary.slug,
+      options.fromGlossary.title,
+    )
+
+    if (glossaryContext) {
+      params.set('from', 'glossary')
+      params.set('glossary', glossaryContext.slug)
+      if (glossaryContext.title) params.set('term', glossaryContext.title)
+    }
   }
 
   if (options.returnTo) {
