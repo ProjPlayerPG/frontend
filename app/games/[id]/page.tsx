@@ -8,6 +8,7 @@ import GameProvenanceBadge, {
 import {
   gameDetailsHref,
   normalizeGamesReturnTo,
+  normalizeGlossaryReturnContext,
 } from '@/lib/catalogFilters'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 
@@ -68,6 +69,8 @@ export default async function GameDetails({
   params: Promise<{ id: string }>
   searchParams: Promise<{
     from?: string | string[]
+    glossary?: string | string[]
+    term?: string | string[]
     returnTo?: string | string[]
   }>
 }) {
@@ -75,6 +78,15 @@ export default async function GameDetails({
   const fromChatbot = Array.isArray(resolvedSearchParams.from)
     ? resolvedSearchParams.from.includes('chatbot')
     : resolvedSearchParams.from === 'chatbot'
+  const fromGlossary = Array.isArray(resolvedSearchParams.from)
+    ? resolvedSearchParams.from.includes('glossary')
+    : resolvedSearchParams.from === 'glossary'
+  const glossaryContext = fromGlossary
+    ? normalizeGlossaryReturnContext(
+        resolvedSearchParams.glossary,
+        resolvedSearchParams.term,
+      )
+    : null
   const rawReturnTo = Array.isArray(resolvedSearchParams.returnTo)
     ? resolvedSearchParams.returnTo[0]
     : resolvedSearchParams.returnTo
@@ -83,6 +95,7 @@ export default async function GameDetails({
   const gameHref = (gameId: number) =>
     gameDetailsHref(gameId, {
       fromChatbot,
+      fromGlossary: glossaryContext ?? undefined,
       returnTo: rawReturnTo ? catalogReturnTo : undefined,
     })
   const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
@@ -136,6 +149,17 @@ export default async function GameDetails({
           >
             <span aria-hidden="true">←</span>
             Retour au Guide RPG
+          </Link>
+        ) : null}
+        {glossaryContext ? (
+          <Link
+            href={`/glossaire/${encodeURIComponent(glossaryContext.slug)}`}
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-strong)] bg-[var(--accent)]/12 px-4 py-2 text-sm font-bold uppercase tracking-[0.18em] text-[var(--accent)] transition hover:border-[var(--accent)] hover:bg-[var(--accent)]/20 hover:text-[var(--foreground)]"
+          >
+            <span aria-hidden="true">←</span>
+            {glossaryContext.title
+              ? `Retour à « ${glossaryContext.title} »`
+              : 'Retour au terme du glossaire'}
           </Link>
         ) : null}
         {game.parent_game?.id ? (

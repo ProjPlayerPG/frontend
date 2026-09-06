@@ -31,6 +31,8 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
+  display: flex;
+  flex-direction: column;
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
   background:
@@ -38,6 +40,11 @@ body {
     radial-gradient(circle at 20% 18%, rgba(223, 191, 122, 0.16), transparent 22%),
     linear-gradient(180deg, #0b1727 0%, #07101c 48%, #040912 100%);
   background-attachment: fixed;
+}
+
+body > main {
+  width: 100%;
+  flex: 1 0 auto;
 }
 
 body::before {
@@ -94,4 +101,106 @@ input {
   height: 1px;
   background: linear-gradient(90deg, var(--accent), transparent);
   transform: translateY(-50%);
+}
+
+.about-content {
+  color: var(--muted);
+}
+
+.about-content > * + * {
+  margin-top: 2rem;
+}
+
+.about-content section + section {
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+}
+
+.about-content h2 {
+  margin: 0;
+  color: var(--foreground);
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.about-content section > p,
+.about-content section > ul,
+.about-content section > ol {
+  max-width: 48rem;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.9;
+}
+
+.about-content ul,
+.about-content ol {
+  padding-left: 1.25rem;
+}
+
+.about-content li + li {
+  margin-top: 0.5rem;
+}
+
+.about-content li::marker {
+  color: var(--accent);
+}
+
+.about-note {
+  border: 1px solid var(--line);
+  border-left-color: var(--accent);
+  border-radius: 0 1.1rem 1.1rem 0;
+  background: linear-gradient(90deg, rgba(223, 191, 122, 0.1), rgba(255, 255, 255, 0.025));
+  padding: 1.1rem 1.25rem;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.about-primary-link,
+.about-secondary-link {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.about-primary-link {
+  margin-top: 1.5rem;
+  border: 1px solid var(--accent-strong);
+  background: var(--accent);
+  padding: 0.85rem 1.15rem;
+  color: var(--background-deep);
+}
+
+.about-primary-link:hover {
+  transform: translateY(-2px);
+  background: var(--accent-strong);
+}
+
+.about-secondary-link {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.7rem 1rem;
+  color: var(--foreground);
+}
+
+.about-secondary-link:hover {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-primary-link,
+  .about-secondary-link {
+    transition: none;
+  }
 }

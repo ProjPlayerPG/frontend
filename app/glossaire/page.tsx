@@ -44,6 +44,13 @@ export default async function GlossairePage() {
             Proposer un terme
           </Link>
         </div>
+        <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--muted)]">
+          Des définitions courtes, des exemples et des contributions relues avant publication.{' '}
+          <Link href="/a-propos/glossaire" className="text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--accent-strong)]">
+            Découvrir comment le glossaire fonctionne
+          </Link>
+          .
+        </p>
       </section>
 
       {entries.length ? (
