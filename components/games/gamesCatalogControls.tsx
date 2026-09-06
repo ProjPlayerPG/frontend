@@ -1,5 +1,6 @@
 'use client'
 
+import { FormEvent, useEffect, useId, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { platformFilters, releaseYearFilters, sortOptions, tagFilters } from '@/lib/gamesFilters'
 import type { GamesFilters } from '@/lib/catalogFilters'
@@ -70,6 +71,7 @@ export default function GamesCatalogControls({
           <span className="text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">Tags</span>
           <SelectShell>
             <select
+              name="tag"
               value={filters.tag}
               onChange={(event) => navigate({ tag: event.target.value, page: 0 })}
               className="h-12 w-full appearance-none rounded-full border border-[var(--line)] bg-[var(--surface-strong)] py-0 pl-4 pr-12 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--line-strong)]"
@@ -88,6 +90,7 @@ export default function GamesCatalogControls({
           <span className="text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">Plateforme</span>
           <SelectShell>
             <select
+              name="platform"
               value={filters.platform}
               onChange={(event) => navigate({ platform: event.target.value, page: 0 })}
               className="h-12 w-full appearance-none rounded-full border border-[var(--line)] bg-[var(--surface-strong)] py-0 pl-4 pr-12 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--line-strong)]"
@@ -106,6 +109,7 @@ export default function GamesCatalogControls({
           <span className="text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">Année de sortie</span>
           <SelectShell>
             <select
+              name="releaseYear"
               value={filters.releaseYear}
               onChange={(event) => navigate({ releaseYear: event.target.value, page: 0 })}
               className="h-12 w-full appearance-none rounded-full border border-[var(--line)] bg-[var(--surface-strong)] py-0 pl-4 pr-12 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--line-strong)]"
@@ -124,6 +128,7 @@ export default function GamesCatalogControls({
           <span className="text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">Tri</span>
           <SelectShell>
             <select
+              name="sort"
               value={filters.sort}
               onChange={(event) => navigate({ sort: event.target.value, page: 0 })}
               className="h-12 w-full appearance-none rounded-full border border-[var(--line)] bg-[var(--surface-strong)] py-0 pl-4 pr-12 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--line-strong)]"
@@ -152,14 +157,23 @@ export function GamesPagination({
   filters,
   canGoBack,
   canGoForward,
+  totalPages,
 }: {
   filters: GamesFilters
   canGoBack: boolean
   canGoForward: boolean
+  totalPages: number
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const currentPage = filters.page + 1
+  const pageInputId = useId()
+  const [pageInput, setPageInput] = useState(String(currentPage))
+
+  useEffect(() => {
+    setPageInput(String(currentPage))
+  }, [currentPage])
 
   const navigate = (page: number) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -173,11 +187,47 @@ export function GamesPagination({
     router.replace(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false })
   }
 
+  const goToPage = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const requestedPage = Number(pageInput)
+    const nextPage = Number.isInteger(requestedPage)
+      ? Math.min(Math.max(requestedPage, 1), totalPages)
+      : currentPage
+
+    setPageInput(String(nextPage))
+    if (nextPage !== currentPage) navigate(nextPage - 1)
+  }
+
   return (
-    <div className="flex flex-col gap-3 rounded-[1.5rem] border border-[var(--line)] bg-white/5 p-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="px-2 text-sm uppercase tracking-[0.2em] text-[var(--muted)]">
-        Page {filters.page + 1}
-      </p>
+    <div className="flex flex-col gap-3 rounded-[1.5rem] border border-[var(--line)] bg-white/5 p-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <p className="px-2 text-sm uppercase tracking-[0.16em] text-[var(--muted)]">
+          Page <strong className="text-[var(--foreground)]">{currentPage}</strong> sur{' '}
+          <strong className="text-[var(--foreground)]">{totalPages}</strong>
+        </p>
+        <form onSubmit={goToPage} className="flex items-center gap-2">
+          <label htmlFor={pageInputId} className="sr-only">
+            Aller à la page
+          </label>
+          <input
+            id={pageInputId}
+            name="page"
+            type="number"
+            step="any"
+            inputMode="numeric"
+            autoComplete="off"
+            value={pageInput}
+            onChange={(event) => setPageInput(event.target.value)}
+            className="h-11 w-20 rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-3 text-center text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+          />
+          <button
+            type="submit"
+            className="h-11 rounded-full border border-[var(--line)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent)] transition hover:border-[var(--line-strong)] hover:bg-white/7"
+          >
+            Aller
+          </button>
+        </form>
+      </div>
       <div className="flex gap-2">
         <button
           type="button"

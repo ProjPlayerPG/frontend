@@ -40,6 +40,8 @@ export default function GuestAuthPanel({ account }: { account: ProfileAccountCon
             E-mail
             <input
               type="email"
+              name="forgotEmail"
+              autoComplete="email"
               value={account.forgotEmail}
               onChange={(event) => account.setForgotEmail(event.target.value)}
               required
@@ -72,6 +74,8 @@ export default function GuestAuthPanel({ account }: { account: ProfileAccountCon
             <label className="grid gap-2 text-sm font-medium text-[var(--muted)]">
               Pseudo
               <input
+                name="username"
+                autoComplete="username"
                 value={account.username}
                 onChange={(event) => account.setUsername(event.target.value)}
                 minLength={3}
@@ -87,6 +91,8 @@ export default function GuestAuthPanel({ account }: { account: ProfileAccountCon
             E-mail
             <input
               type="email"
+              name="email"
+              autoComplete="email"
               value={account.email}
               onChange={(event) => account.setEmail(event.target.value)}
               required
@@ -99,6 +105,8 @@ export default function GuestAuthPanel({ account }: { account: ProfileAccountCon
             Mot de passe
             <input
               type="password"
+              name="password"
+              autoComplete={account.isSignup ? 'new-password' : 'current-password'}
               value={account.password}
               onChange={(event) => account.setPassword(event.target.value)}
               minLength={6}

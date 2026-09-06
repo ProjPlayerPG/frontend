@@ -1,12 +1,18 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import FavoriteButton from '@/components/games/favoriteButton'
+import GameMediaGallery, {
+  type GameScreenshot,
+  type GameVideo,
+} from '@/components/games/gameMediaGallery'
 import GameTranslationToggle from '@/components/games/gameTranslationToggle'
 import GameProvenanceBadge, {
   type GameProvenance,
 } from '@/components/games/gameProvenanceBadge'
 import {
   gameDetailsHref,
+  gamesByCompanyHref,
+  gamesByPlatformHref,
   normalizeGamesReturnTo,
   normalizeGlossaryReturnContext,
 } from '@/lib/catalogFilters'
@@ -27,6 +33,8 @@ type Game = {
   }[]
   cover?: { id?: number; url?: string }
   first_release_date?: number
+  videos?: GameVideo[]
+  screenshots?: GameScreenshot[]
   provenance?: GameProvenance
   parent_game?: {
     id: number
@@ -52,14 +60,35 @@ function formatReleaseDate(timestamp?: number) {
   }).format(new Date(timestamp * 1000))
 }
 
-function compactList(items: string[], fallback: string) {
+function MetadataLinks({
+  items,
+  hrefFor,
+  fallback,
+}: {
+  items: { id: number; name: string }[]
+  hrefFor: (item: { id: number; name: string }) => string
+  fallback: string
+}) {
   if (!items.length) return fallback
 
-  if (items.length <= 3) {
-    return items.join(', ')
-  }
+  const visibleItems = items.slice(0, 3)
 
-  return `${items.slice(0, 3).join(', ')} +${items.length - 3}`
+  return (
+    <>
+      {visibleItems.map((item, index) => (
+        <span key={item.id}>
+          {index > 0 ? ', ' : ''}
+          <Link
+            href={hrefFor(item)}
+            className="underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--accent)]"
+          >
+            {item.name}
+          </Link>
+        </span>
+      ))}
+      {items.length > 3 ? ` +${items.length - 3}` : ''}
+    </>
+  )
 }
 
 export default async function GameDetails({
@@ -117,17 +146,17 @@ export default async function GameDetails({
   const coverUrl = igdbUrlWithSize(game.cover?.url, 't_1080p')
   const favoriteCoverUrl = igdbUrlWithSize(game.cover?.url, 't_cover_big')
   const releaseDate = formatReleaseDate(game.first_release_date)
-  const platforms = game.platforms?.map((platform) => platform.name).filter(Boolean) ?? []
+  const platforms = game.platforms?.filter((platform) => platform.id && platform.name) ?? []
   const studios =
     game.involved_companies
       ?.filter((entry) => entry.developer && entry.company?.name)
-      .map((entry) => entry.company?.name)
-      .filter((name): name is string => Boolean(name)) ?? []
+      .map((entry) => entry.company)
+      .filter((company): company is { id: number; name: string } => Boolean(company?.id && company.name)) ?? []
   const publishers =
     game.involved_companies
       ?.filter((entry) => entry.publisher && entry.company?.name)
-      .map((entry) => entry.company?.name)
-      .filter((name): name is string => Boolean(name)) ?? []
+      .map((entry) => entry.company)
+      .filter((company): company is { id: number; name: string } => Boolean(company?.id && company.name)) ?? []
   const relatedContent = [...(game.expansions ?? []), ...(game.dlcs ?? [])].filter(
     (related, index, list) => related.id && list.findIndex((item) => item.id === related.id) === index,
   )
@@ -214,7 +243,14 @@ export default async function GameDetails({
             </div>
           </div>
 
-          <div className="flex flex-col justify-center">
+          <GameMediaGallery
+            gameName={game.name}
+            coverUrl={coverUrl}
+            videos={game.videos}
+            screenshots={game.screenshots}
+          />
+
+          <div className="flex flex-col justify-center lg:col-span-2">
             <p className="font-display text-sm uppercase tracking-[0.34em] text-[var(--accent)]">
               Fiche de jeu
             </p>
@@ -248,19 +284,27 @@ export default async function GameDetails({
               <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
                 <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Plateformes</p>
                 <p className="mt-2 text-base font-medium leading-7 text-[var(--foreground)]">
-                  {compactList(platforms, 'Non renseignees')}
+                  <MetadataLinks items={platforms} hrefFor={gamesByPlatformHref} fallback="Non renseignées" />
                 </p>
               </div>
               <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
                 <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Studio</p>
                 <p className="mt-2 text-base font-medium leading-7 text-[var(--foreground)]">
-                  {compactList(studios, 'Non renseigne')}
+                  <MetadataLinks
+                    items={studios}
+                    hrefFor={(company) => gamesByCompanyHref(company, 'developer')}
+                    fallback="Non renseigné"
+                  />
                 </p>
               </div>
               <div className="rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
                 <p className="text-xs uppercase tracking-[0.26em] text-[var(--accent-cool)]">Éditeur</p>
                 <p className="mt-2 text-base font-medium leading-7 text-[var(--foreground)]">
-                  {compactList(publishers, 'Non renseigne')}
+                  <MetadataLinks
+                    items={publishers}
+                    hrefFor={(company) => gamesByCompanyHref(company, 'publisher')}
+                    fallback="Non renseigné"
+                  />
                 </p>
               </div>
             </div>

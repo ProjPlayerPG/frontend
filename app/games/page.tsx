@@ -11,6 +11,11 @@ export default async function GamesPage({
 }) {
   const resolvedSearchParams = await searchParams
   const filters = filtersFromSearchParams(resolvedSearchParams)
+  const contextTitle = filters.companyId
+    ? `Jeux ${filters.companyRole === 'publisher' ? 'édités' : 'développés'} par ${filters.companyName || 'ce studio'}`
+    : filters.platformId
+      ? `Jeux sur ${filters.platformName || 'cette plateforme'}`
+      : ''
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
@@ -18,10 +23,10 @@ export default async function GamesPage({
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--accent-cool)]">
-              {filters.query ? 'Résultats de recherche' : 'Catalogue RPG'}
+              {filters.query ? 'Résultats de recherche' : contextTitle ? 'Sélection RPG' : 'Catalogue RPG'}
             </p>
             <h1 className="font-display mt-2 text-4xl font-semibold sm:text-5xl">
-              {filters.query ? `« ${filters.query} »` : 'Explorer les jeux'}
+              {filters.query ? `« ${filters.query} »` : contextTitle || 'Explorer les jeux'}
             </h1>
           </div>
           <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">

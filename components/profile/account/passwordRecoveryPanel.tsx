@@ -19,6 +19,8 @@ export default function PasswordRecoveryPanel({ account }: { account: ProfileAcc
           Nouveau mot de passe
           <input
             type="password"
+            name="recoveryPassword"
+            autoComplete="new-password"
             value={account.recoveryPassword}
             onChange={(event) => account.setRecoveryPassword(event.target.value)}
             minLength={6}

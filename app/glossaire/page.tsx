@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import GlossaryCard from '@/components/glossary/glossaryCard'
+import GlossaryIndex from '@/components/glossary/glossaryIndex'
 import { createSupabaseAdminClient } from '@/lib/server/supabaseAdmin'
 
 export const dynamic = 'force-dynamic'
@@ -54,16 +54,7 @@ export default async function GlossairePage() {
       </section>
 
       {entries.length ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {entries.map((entry) => (
-            <GlossaryCard
-              key={entry.id}
-              slug={entry.slug}
-              title={entry.title}
-              description={entry.short_description}
-            />
-          ))}
-        </div>
+        <GlossaryIndex entries={entries} />
       ) : (
         <section className="panel rounded-[1.5rem] p-6">
           <h2 className="font-display text-3xl text-[var(--foreground)]">Aucune entrée publiée</h2>
