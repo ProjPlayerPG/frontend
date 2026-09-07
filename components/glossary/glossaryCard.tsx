@@ -1,9 +1,12 @@
 import Link from 'next/link'
+import GlossaryTagPills from '@/components/glossary/glossaryTagPills'
+import type { GlossaryTag } from '@/lib/glossaryTags'
 
 type GlossaryCardProps = {
   slug: string
   title: string
   description: string
+  tags?: GlossaryTag[]
   fromAdmin?: boolean
 }
 
@@ -11,6 +14,7 @@ export default function GlossaryCard({
   slug,
   title,
   description,
+  tags = [],
   fromAdmin = false,
 }: GlossaryCardProps) {
   return (
@@ -22,6 +26,7 @@ export default function GlossaryCard({
         <h2 className="font-display text-3xl text-[var(--foreground)] transition group-hover:text-[var(--accent)]">
           {title}
         </h2>
+        <GlossaryTagPills tags={tags} className="mt-3" />
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{description}</p>
         <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
           Lire l&apos;entrée

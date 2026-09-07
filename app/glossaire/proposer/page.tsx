@@ -1,7 +1,13 @@
 import Link from 'next/link'
 import GlossaryForm from '@/components/glossary/glossaryForm'
+import { getGlossaryTags } from '@/lib/server/glossaryTags'
+import { createSupabaseAdminClient } from '@/lib/server/supabaseAdmin'
 
-export default function ProposeGlossaryEntryPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function ProposeGlossaryEntryPage() {
+  const tags = await getGlossaryTags(createSupabaseAdminClient())
+
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <Link
@@ -12,7 +18,7 @@ export default function ProposeGlossaryEntryPage() {
       </Link>
 
       <div className="mt-6">
-        <GlossaryForm />
+        <GlossaryForm availableTags={tags} />
       </div>
     </main>
   )

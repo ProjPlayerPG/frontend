@@ -53,7 +53,6 @@ Chaque fiche affiche :
 - Bouton favori.
 - Extensions et contenus liés si le jeu en possède.
 - Lien retour vers le jeu de base si la fiche consultée est une extension.
-- Section "Notes presse" préparée pour une future intégration fiable.
 
 ## Traduction IA
 
@@ -156,6 +155,11 @@ Protection :
 - Les sources non HTTPS et les liens locaux/privés sont refusés.
 - L'admin voit les sources dans la modération.
 - Les pages détaillées affichent le contributeur et ses autres publications.
+- Chaque proposition utilise entre un et trois tags contrôlés.
+- La recherche du glossaire se combine avec un filtre par tag.
+- Les cartes, fiches et pages de contributeur affichent les tags associés.
+- La définition conserve les sauts de ligne simples et sépare visuellement les paragraphes saisis.
+- L’admin peut créer des tags, les affecter aux entrées et supprimer les tags inutilisés.
 - Une notification profil est créée quand l'admin publie ou refuse une proposition.
 
 Les contributions d'un utilisateur standard sont placées en `pending`. Celles d'un admin sont publiées immédiatement. Le détail des tables et policies est disponible dans la [documentation Supabase](supabase.md).

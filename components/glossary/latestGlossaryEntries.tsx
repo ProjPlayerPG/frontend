@@ -1,11 +1,14 @@
 import GlossaryCard from '@/components/glossary/glossaryCard'
 import { createSupabaseAdminClient } from '@/lib/server/supabaseAdmin'
+import { getGlossaryTagsByEntryId } from '@/lib/server/glossaryTags'
+import type { GlossaryTag } from '@/lib/glossaryTags'
 
 type GlossaryEntry = {
   id: string
   slug: string
   title: string
   short_description: string
+  tags: GlossaryTag[]
 }
 
 async function getLatestPublishedEntries() {
@@ -19,7 +22,13 @@ async function getLatestPublishedEntries() {
 
   if (error) throw new Error(error.message)
 
-  return (data ?? []) as GlossaryEntry[]
+  const entries = (data ?? []) as Omit<GlossaryEntry, 'tags'>[]
+  const tagsByEntryId = await getGlossaryTagsByEntryId(admin, entries.map((entry) => entry.id))
+
+  return entries.map((entry) => ({
+    ...entry,
+    tags: tagsByEntryId.get(entry.id) ?? [],
+  }))
 }
 
 export default async function LatestGlossaryEntries() {
@@ -42,6 +51,7 @@ export default async function LatestGlossaryEntries() {
             slug={entry.slug}
             title={entry.title}
             description={entry.short_description}
+            tags={entry.tags}
           />
         ))}
       </div>

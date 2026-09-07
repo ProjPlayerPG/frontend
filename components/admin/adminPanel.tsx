@@ -1,7 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import {
+  MAX_GLOSSARY_TAGS_PER_ENTRY,
+  type GlossaryEntryTag,
+  type GlossaryTag,
+} from '@/lib/glossaryTags'
 
 type Role = 'user' | 'admin'
 
@@ -56,6 +61,8 @@ type AdminPayload = {
   allEntries: GlossaryEntry[]
   entryGames: GlossaryEntryGame[]
   entrySources: GlossaryEntrySource[]
+  glossaryTags: GlossaryTag[]
+  entryTags: GlossaryEntryTag[]
   authors: Author[]
 }
 
@@ -100,13 +107,64 @@ function StatusBadge({ status }: { status: GlossaryEntry['status'] }) {
   )
 }
 
+function EntryTagEditor({
+  entry,
+  tags,
+  selectedTagIds,
+  disabled,
+  onToggle,
+}: {
+  entry: GlossaryEntry
+  tags: GlossaryTag[]
+  selectedTagIds: string[]
+  disabled: boolean
+  onToggle: (entry: GlossaryEntry, tagId: string) => void
+}) {
+  return (
+    <div>
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+        Catégories
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {tags.map((tag) => {
+          const selected = selectedTagIds.includes(tag.id)
+
+          return (
+            <button
+              key={tag.id}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onToggle(entry, tag.id)}
+              disabled={disabled}
+              className={`rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition disabled:cursor-wait disabled:opacity-55 ${
+                selected
+                  ? 'border-[var(--accent-cool)] bg-[var(--accent-cool)]/18 text-[var(--accent-cool)]'
+                  : 'border-[var(--line)] bg-white/5 text-[var(--muted)] hover:text-[var(--foreground)]'
+              }`}
+            >
+              {tag.name}
+            </button>
+          )
+        })}
+      </div>
+      {!selectedTagIds.length ? (
+        <p className="mt-2 text-xs text-amber-100">Cette ancienne entrée doit encore être catégorisée.</p>
+      ) : null}
+    </div>
+  )
+}
+
 export default function AdminPanel() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [pendingEntries, setPendingEntries] = useState<GlossaryEntry[]>([])
   const [allEntries, setAllEntries] = useState<GlossaryEntry[]>([])
   const [entryGames, setEntryGames] = useState<GlossaryEntryGame[]>([])
   const [entrySources, setEntrySources] = useState<GlossaryEntrySource[]>([])
+  const [glossaryTags, setGlossaryTags] = useState<GlossaryTag[]>([])
+  const [entryTags, setEntryTags] = useState<GlossaryEntryTag[]>([])
   const [authors, setAuthors] = useState<Author[]>([])
+  const [newTagName, setNewTagName] = useState('')
+  const [tagDeleteConfirmationId, setTagDeleteConfirmationId] = useState('')
   const [expandedPendingEntryId, setExpandedPendingEntryId] = useState('')
   const [expandedLibraryEntryId, setExpandedLibraryEntryId] = useState('')
   const [expandedAuthorId, setExpandedAuthorId] = useState('')
@@ -164,6 +222,26 @@ export default function AdminPanel() {
     return map
   }, [entrySources])
 
+  const tagIdsByEntryId = useMemo(() => {
+    const map = new Map<string, string[]>()
+
+    for (const entryTag of entryTags) {
+      const tagIds = map.get(entryTag.glossary_entry_id) ?? []
+      tagIds.push(entryTag.tag_id)
+      map.set(entryTag.glossary_entry_id, tagIds)
+    }
+
+    return map
+  }, [entryTags])
+
+  const tagUsageCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const entryTag of entryTags) {
+      counts.set(entryTag.tag_id, (counts.get(entryTag.tag_id) ?? 0) + 1)
+    }
+    return counts
+  }, [entryTags])
+
   async function adminFetch(options?: RequestInit) {
     const { data } = await supabase.auth.getSession()
     const token = data.session?.access_token
@@ -201,6 +279,8 @@ export default function AdminPanel() {
       setAllEntries(payload.allEntries ?? payload.pendingEntries)
       setEntryGames(payload.entryGames)
       setEntrySources(payload.entrySources)
+      setGlossaryTags(payload.glossaryTags ?? [])
+      setEntryTags(payload.entryTags ?? [])
       setAuthors(payload.authors)
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Impossible de charger l’administration.')
@@ -241,6 +321,96 @@ export default function AdminPanel() {
       setMessage(`${profile.username} est maintenant ${role === 'admin' ? 'admin' : 'utilisateur'}.`)
     } catch (roleError) {
       setError(roleError instanceof Error ? roleError.message : 'Impossible de changer le rôle.')
+    } finally {
+      setSubmitting('')
+    }
+  }
+
+  async function createTag(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const name = newTagName.trim()
+    if (!name) return
+
+    setSubmitting('create-tag')
+    setError('')
+    setMessage('')
+
+    try {
+      const payload = (await adminFetch({
+        method: 'PATCH',
+        body: JSON.stringify({ action: 'createGlossaryTag', name }),
+      })) as { tag: GlossaryTag }
+
+      setGlossaryTags((currentTags) =>
+        [...currentTags, payload.tag].sort((first, second) => first.name.localeCompare(second.name, 'fr')),
+      )
+      setNewTagName('')
+      setMessage(`Le tag « ${payload.tag.name} » est disponible.`)
+    } catch (tagError) {
+      setError(tagError instanceof Error ? tagError.message : 'Impossible de créer le tag.')
+    } finally {
+      setSubmitting('')
+    }
+  }
+
+  async function deleteTag(tag: GlossaryTag) {
+    setSubmitting(`delete-tag-${tag.id}`)
+    setError('')
+    setMessage('')
+
+    try {
+      await adminFetch({
+        method: 'DELETE',
+        body: JSON.stringify({ tagId: tag.id }),
+      })
+      setGlossaryTags((currentTags) => currentTags.filter((currentTag) => currentTag.id !== tag.id))
+      setTagDeleteConfirmationId('')
+      setMessage(`Le tag « ${tag.name} » a été supprimé.`)
+    } catch (tagError) {
+      setError(tagError instanceof Error ? tagError.message : 'Impossible de supprimer le tag.')
+    } finally {
+      setSubmitting('')
+    }
+  }
+
+  async function toggleEntryTag(entry: GlossaryEntry, tagId: string) {
+    const currentTagIds = tagIdsByEntryId.get(entry.id) ?? []
+    const selected = currentTagIds.includes(tagId)
+    const nextTagIds = selected
+      ? currentTagIds.filter((currentTagId) => currentTagId !== tagId)
+      : [...currentTagIds, tagId]
+
+    if (!nextTagIds.length) {
+      setError('Une entrée doit conserver au moins un tag.')
+      return
+    }
+
+    if (nextTagIds.length > MAX_GLOSSARY_TAGS_PER_ENTRY) {
+      setError(`Une entrée peut avoir au maximum ${MAX_GLOSSARY_TAGS_PER_ENTRY} tags.`)
+      return
+    }
+
+    setSubmitting(`tags-${entry.id}`)
+    setError('')
+    setMessage('')
+
+    try {
+      const payload = (await adminFetch({
+        method: 'PATCH',
+        body: JSON.stringify({
+          action: 'updateGlossaryEntryTags',
+          entryId: entry.id,
+          tagIds: nextTagIds,
+        }),
+      })) as { entryTags: GlossaryEntryTag[] }
+
+      setEntryTags((currentEntryTags) => [
+        ...currentEntryTags.filter((entryTag) => entryTag.glossary_entry_id !== entry.id),
+        ...payload.entryTags,
+      ])
+      setMessage(`Tags de « ${entry.title} » mis à jour.`)
+    } catch (tagError) {
+      setError(tagError instanceof Error ? tagError.message : 'Impossible de modifier les tags.')
     } finally {
       setSubmitting('')
     }
@@ -367,6 +537,7 @@ export default function AdminPanel() {
             const author = authorsById.get(entry.author_id)
             const games = gamesByEntryId.get(entry.id) ?? []
             const sources = sourcesByEntryId.get(entry.id) ?? []
+            const selectedTagIds = tagIdsByEntryId.get(entry.id) ?? []
             const isExpanded = expandedPendingEntryId === entry.id
             const isAuthorExpanded = expandedAuthorId === entry.author_id
 
@@ -465,6 +636,13 @@ export default function AdminPanel() {
 
                   {isExpanded ? (
                     <div className="grid gap-5 border-t border-[var(--line)] pt-5">
+                      <EntryTagEditor
+                        entry={entry}
+                        tags={glossaryTags}
+                        selectedTagIds={selectedTagIds}
+                        disabled={submitting === `tags-${entry.id}`}
+                        onToggle={toggleEntryTag}
+                      />
                       <div>
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
                           Proposition complète
@@ -526,6 +704,91 @@ export default function AdminPanel() {
       </section>
 
       <section className="panel rounded-[2rem] p-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Catégorisation</p>
+            <h2 className="font-display mt-2 text-3xl text-[var(--foreground)]">Tags du glossaire</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+              Ajoute des catégories réutilisables. Un tag utilisé doit d’abord être retiré de toutes les entrées avant sa suppression.
+            </p>
+          </div>
+          <p className="text-sm text-[var(--muted)]">
+            {glossaryTags.length} tag{glossaryTags.length > 1 ? 's' : ''}
+          </p>
+        </div>
+
+        <form onSubmit={createTag} className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <label className="min-w-0 flex-1">
+            <span className="sr-only">Nom du nouveau tag</span>
+            <input
+              value={newTagName}
+              onChange={(event) => setNewTagName(event.target.value)}
+              minLength={2}
+              maxLength={30}
+              placeholder="Ex. Économie"
+              className="w-full rounded-full border border-[var(--line)] bg-black/18 px-5 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={submitting === 'create-tag' || newTagName.trim().length < 2}
+            className="rounded-full border border-[var(--accent-strong)] bg-[var(--accent)] px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#101722] transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {submitting === 'create-tag' ? 'Ajout...' : 'Ajouter le tag'}
+          </button>
+        </form>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {glossaryTags.map((tag) => {
+            const usageCount = tagUsageCounts.get(tag.id) ?? 0
+            const confirming = tagDeleteConfirmationId === tag.id
+
+            return (
+              <div
+                key={tag.id}
+                className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/5 py-1 pl-4 pr-1"
+              >
+                <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent-cool)]">
+                  {tag.name}
+                </span>
+                <span className="text-[0.65rem] text-[var(--muted)]">{usageCount}</span>
+                {confirming ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setTagDeleteConfirmationId('')}
+                      className="rounded-full px-2 py-1 text-[0.65rem] uppercase text-[var(--muted)]"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteTag(tag)}
+                      disabled={Boolean(submitting)}
+                      className="rounded-full bg-red-400/18 px-2 py-1 text-[0.65rem] font-bold uppercase text-red-100 disabled:opacity-50"
+                    >
+                      Confirmer
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    aria-label={`Supprimer le tag ${tag.name}`}
+                    onClick={() => setTagDeleteConfirmationId(tag.id)}
+                    disabled={usageCount > 0 || Boolean(submitting)}
+                    title={usageCount ? 'Ce tag est encore utilisé' : 'Supprimer ce tag'}
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-sm text-[var(--muted)] transition hover:bg-red-400/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="panel rounded-[2rem] p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Publications</p>
@@ -572,6 +835,7 @@ export default function AdminPanel() {
             const author = authorsById.get(entry.author_id)
             const games = gamesByEntryId.get(entry.id) ?? []
             const sources = sourcesByEntryId.get(entry.id) ?? []
+            const selectedTagIds = tagIdsByEntryId.get(entry.id) ?? []
             const isExpanded = expandedLibraryEntryId === entry.id
             const isConfirmingDelete = deleteConfirmationId === entry.id
 
@@ -651,6 +915,13 @@ export default function AdminPanel() {
 
                 {isExpanded ? (
                   <div className="mt-5 grid gap-5 border-t border-[var(--line)] pt-5">
+                    <EntryTagEditor
+                      entry={entry}
+                      tags={glossaryTags}
+                      selectedTagIds={selectedTagIds}
+                      disabled={submitting === `tags-${entry.id}`}
+                      onToggle={toggleEntryTag}
+                    />
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
                         Contenu complet
