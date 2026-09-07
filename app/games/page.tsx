@@ -15,7 +15,9 @@ export default async function GamesPage({
     ? `Jeux ${filters.companyRole === 'publisher' ? 'édités' : 'développés'} par ${filters.companyName || 'ce studio'}`
     : filters.platformId
       ? `Jeux sur ${filters.platformName || 'cette plateforme'}`
-      : ''
+      : filters.tagId
+        ? `Jeux du genre ${filters.tag || 'sélectionné'}`
+        : ''
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">

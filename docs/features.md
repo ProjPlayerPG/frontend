@@ -52,6 +52,7 @@ Chaque fiche affiche :
 - Traduction Français / Original.
 - Bouton favori.
 - Extensions et contenus liés si le jeu en possède.
+- Tags de genre cliquables vers le catalogue filtré sur leur identifiant IGDB.
 - Lien retour vers le jeu de base si la fiche consultée est une extension.
 
 ## Traduction IA
