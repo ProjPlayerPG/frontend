@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import GlossaryCard from '@/components/glossary/glossaryCard'
 import { createSupabaseAdminClient } from '@/lib/server/supabaseAdmin'
+import { getGlossaryTagsByEntryId } from '@/lib/server/glossaryTags'
+import type { GlossaryTag } from '@/lib/glossaryTags'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +23,7 @@ type GlossaryEntry = {
   slug: string
   title: string
   short_description: string
+  tags: GlossaryTag[]
 }
 
 async function getAuthorProfile(userId: string) {
@@ -45,9 +48,18 @@ async function getAuthorProfile(userId: string) {
 
   if (!author) return null
 
+  const typedEntries = (entries ?? []) as Omit<GlossaryEntry, 'tags'>[]
+  const tagsByEntryId = await getGlossaryTagsByEntryId(
+    admin,
+    typedEntries.map((entry) => entry.id),
+  )
+
   return {
     author: author as Author,
-    entries: (entries ?? []) as GlossaryEntry[],
+    entries: typedEntries.map((entry) => ({
+      ...entry,
+      tags: tagsByEntryId.get(entry.id) ?? [],
+    })),
   }
 }
 
@@ -119,6 +131,7 @@ export default async function GlossaryAuthorPage({ params, searchParams }: PageP
                 slug={entry.slug}
                 title={entry.title}
                 description={entry.short_description}
+                tags={entry.tags}
                 fromAdmin={fromAdmin}
               />
             ))}

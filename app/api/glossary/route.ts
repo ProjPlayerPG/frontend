@@ -1,5 +1,6 @@
 import { createSupabaseAdminClient } from '@/lib/server/supabaseAdmin'
 import { slugify, validateHttpsSource } from '@/lib/glossaryValidation'
+import { validateGlossaryTagIds } from '@/lib/glossaryTags'
 
 type SourcePayload = {
   label?: string
@@ -18,6 +19,7 @@ type GlossaryPayload = {
   detailedDescription?: string
   sources?: SourcePayload[]
   games?: GamePayload[]
+  tagIds?: unknown
 }
 
 function serverError(message: string, status = 500) {
@@ -63,6 +65,7 @@ export async function POST(request: Request) {
     const title = body.title?.trim()
     const shortDescription = body.shortDescription?.trim()
     const detailedDescription = body.detailedDescription?.trim()
+    const { tagIds, error: tagSelectionError } = validateGlossaryTagIds(body.tagIds)
 
     if (!title || title.length > 90) {
       return serverError('Titre invalide.', 400)
@@ -74,6 +77,23 @@ export async function POST(request: Request) {
 
     if (!detailedDescription || detailedDescription.length > 6000) {
       return serverError('Description avancée invalide.', 400)
+    }
+
+    if (tagSelectionError) {
+      return serverError(tagSelectionError, 400)
+    }
+
+    const { data: knownTags, error: knownTagsError } = await admin
+      .from('glossary_tags')
+      .select('id')
+      .in('id', tagIds)
+
+    if (knownTagsError) {
+      return serverError(knownTagsError.message)
+    }
+
+    if ((knownTags ?? []).length !== tagIds.length) {
+      return serverError('Un ou plusieurs tags sont invalides.', 400)
     }
 
     const sources = (body.sources ?? [])
@@ -163,6 +183,18 @@ export async function POST(request: Request) {
         await admin.from('glossary_entries').delete().eq('id', entry.id)
         return serverError(gamesError.message)
       }
+    }
+
+    const { error: tagsError } = await admin.from('glossary_entry_tags').insert(
+      tagIds.map((tagId) => ({
+        glossary_entry_id: entry.id,
+        tag_id: tagId,
+      })),
+    )
+
+    if (tagsError) {
+      await admin.from('glossary_entries').delete().eq('id', entry.id)
+      return serverError(tagsError.message)
     }
 
     return Response.json({

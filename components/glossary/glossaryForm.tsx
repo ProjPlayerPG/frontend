@@ -5,6 +5,10 @@ import { FormEvent, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { igdbUrlWithSize, normalizeBaseUrl } from '@/lib/igdb'
 import { validateHttpsSource } from '@/lib/glossaryValidation'
+import {
+  MAX_GLOSSARY_TAGS_PER_ENTRY,
+  type GlossaryTag,
+} from '@/lib/glossaryTags'
 
 type SearchGame = {
   id: number
@@ -25,12 +29,13 @@ type SourceInput = {
 
 const emptySource: SourceInput = { label: '', url: '' }
 
-export default function GlossaryForm() {
+export default function GlossaryForm({ availableTags }: { availableTags: GlossaryTag[] }) {
   const [sessionReady, setSessionReady] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
   const [title, setTitle] = useState('')
   const [shortDescription, setShortDescription] = useState('')
   const [detailedDescription, setDetailedDescription] = useState('')
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
   const [sources, setSources] = useState<SourceInput[]>([{ ...emptySource }])
   const [gameQuery, setGameQuery] = useState('')
   const [gameResults, setGameResults] = useState<SearchGame[]>([])
@@ -136,6 +141,23 @@ export default function GlossaryForm() {
     setSelectedGames((currentGames) => currentGames.filter((game) => game.igdb_game_id !== gameId))
   }
 
+  function toggleTag(tagId: string) {
+    if (selectedTagIds.includes(tagId)) {
+      setSelectedTagIds((currentTagIds) =>
+        currentTagIds.filter((currentTagId) => currentTagId !== tagId),
+      )
+      return
+    }
+
+    if (selectedTagIds.length >= MAX_GLOSSARY_TAGS_PER_ENTRY) {
+      setError(`Choisis au maximum ${MAX_GLOSSARY_TAGS_PER_ENTRY} tags.`)
+      return
+    }
+
+    setError('')
+    setSelectedTagIds((currentTagIds) => [...currentTagIds, tagId])
+  }
+
   async function submitEntry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
@@ -150,6 +172,11 @@ export default function GlossaryForm() {
 
     if (!title.trim() || !shortDescription.trim() || !detailedDescription.trim()) {
       setError('Remplis le titre, la description courte et la description avancée.')
+      return
+    }
+
+    if (!selectedTagIds.length) {
+      setError('Choisis au moins un tag pour catégoriser le terme.')
       return
     }
 
@@ -189,6 +216,7 @@ export default function GlossaryForm() {
           detailedDescription: detailedDescription.trim(),
           sources: cleanedSources,
           games: selectedGames,
+          tagIds: selectedTagIds,
         }),
       })
 
@@ -201,6 +229,7 @@ export default function GlossaryForm() {
       setTitle('')
       setShortDescription('')
       setDetailedDescription('')
+      setSelectedTagIds([])
       setSources([{ ...emptySource }])
       setSelectedGames([])
       setMessage(
@@ -292,6 +321,34 @@ export default function GlossaryForm() {
               placeholder="Le contenu détaillé affiché sur la page de l&apos;entrée."
             />
           </label>
+
+          <fieldset className="grid gap-3">
+            <legend className="text-sm font-bold text-[var(--muted)]">Tags</legend>
+            <p className="mt-1 text-xs leading-5 text-[var(--muted)]/80">
+              Choisis entre 1 et {MAX_GLOSSARY_TAGS_PER_ENTRY} catégories pour aider à retrouver ce terme.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {availableTags.map((tag) => {
+                const selected = selectedTagIds.includes(tag.id)
+
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => toggleTag(tag.id)}
+                    className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] transition ${
+                      selected
+                        ? 'border-[var(--accent-cool)] bg-[var(--accent-cool)] text-[#101722]'
+                        : 'border-[var(--line)] bg-white/5 text-[var(--muted)] hover:border-[var(--accent-cool)]/60 hover:text-[var(--foreground)]'
+                    }`}
+                  >
+                    {tag.name}
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
 
           <div className="grid gap-3">
             <div>

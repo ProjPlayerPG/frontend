@@ -311,14 +311,6 @@ export default async function GameDetails({
 
             <GameTranslationToggle gameId={game.id} summary={game.summary} storyline={game.storyline} />
 
-            <div className="mt-8 max-w-3xl rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
-              <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">Notes presse</p>
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                Les notes presse seront ajoutées via des sources stables et officielles lorsque disponibles.
-                PlayerPG evite le scraping fragile pour garder des fiches fiables.
-              </p>
-            </div>
-
             {relatedContent.length > 0 ? (
               <div className="mt-8 max-w-3xl rounded-[1.4rem] border border-[var(--line)] bg-black/14 p-5">
                 <p className="text-sm uppercase tracking-[0.26em] text-[var(--accent)]">

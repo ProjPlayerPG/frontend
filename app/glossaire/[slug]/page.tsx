@@ -1,7 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import GlossaryDefinition from '@/components/glossary/glossaryDefinition'
+import GlossaryTagPills from '@/components/glossary/glossaryTagPills'
 import { gameDetailsHref } from '@/lib/catalogFilters'
+import { getGlossaryTagsByEntryId } from '@/lib/server/glossaryTags'
 import { createSupabaseAdminClient } from '@/lib/server/supabaseAdmin'
 
 export const dynamic = 'force-dynamic'
@@ -81,6 +84,8 @@ async function getGlossaryEntry(slug: string) {
   if (gamesError) throw new Error(gamesError.message)
   if (sourcesError) throw new Error(sourcesError.message)
 
+  const tagsByEntryId = await getGlossaryTagsByEntryId(admin, [entry.id])
+
   const typedEntry = entry as GlossaryEntry
   const [{ data: author, error: authorError }, { data: otherEntries, error: otherEntriesError }] =
     typedEntry.author_id
@@ -110,6 +115,7 @@ async function getGlossaryEntry(slug: string) {
     sources: (sources ?? []) as GlossarySource[],
     author: (author ?? null) as GlossaryAuthor | null,
     otherEntries: (otherEntries ?? []) as AuthorEntry[],
+    tags: tagsByEntryId.get(entry.id) ?? [],
   }
 }
 
@@ -126,7 +132,7 @@ export default async function GlossaryDetailPage({ params, searchParams }: PageP
     notFound()
   }
 
-  const { entry, games, sources, author, otherEntries } = payload
+  const { entry, games, sources, author, otherEntries, tags } = payload
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
@@ -144,16 +150,13 @@ export default async function GlossaryDetailPage({ params, searchParams }: PageP
         <h1 className="font-display mt-3 text-5xl font-semibold leading-none text-[var(--foreground)] sm:text-6xl">
           {entry.title}
         </h1>
+        <GlossaryTagPills tags={tags} linked className="mt-4" />
         <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--muted)]">{entry.short_description}</p>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_18rem]">
           <div>
             <h2 className="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">Définition</h2>
-            <div className="mt-4 space-y-5 text-base leading-8 text-[var(--muted)]">
-              {entry.detailed_description.split(/\n{2,}/).map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+            <GlossaryDefinition text={entry.detailed_description} />
           </div>
 
           <aside className="grid content-start gap-4">

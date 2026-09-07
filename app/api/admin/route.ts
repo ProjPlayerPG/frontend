@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { slugify } from '@/lib/glossaryValidation'
+import { normalizeGlossaryTagName, validateGlossaryTagIds } from '@/lib/glossaryTags'
 
 type AdminAction =
   | {
@@ -10,6 +12,15 @@ type AdminAction =
       action: 'reviewGlossaryEntry'
       entryId: string
       status: 'published' | 'rejected'
+    }
+  | {
+      action: 'createGlossaryTag'
+      name: string
+    }
+  | {
+      action: 'updateGlossaryEntryTags'
+      entryId: string
+      tagIds: unknown
     }
 
 function serverError(message: string, status = 500) {
@@ -113,6 +124,28 @@ export async function GET(request: Request) {
       return serverError(sourcesError.message)
     }
 
+    const [{ data: glossaryTags, error: glossaryTagsError }, { data: entryTags, error: entryTagsError }] =
+      await Promise.all([
+        admin
+          .from('glossary_tags')
+          .select('id, slug, name')
+          .order('name', { ascending: true }),
+        entryIds.length
+          ? admin
+              .from('glossary_entry_tags')
+              .select('glossary_entry_id, tag_id')
+              .in('glossary_entry_id', entryIds)
+          : Promise.resolve({ data: [], error: null }),
+      ])
+
+    if (glossaryTagsError) {
+      return serverError(glossaryTagsError.message)
+    }
+
+    if (entryTagsError) {
+      return serverError(entryTagsError.message)
+    }
+
     const pendingEntries = (entries ?? [])
       .filter((entry) => entry.status === 'pending')
       .sort((first, second) => first.created_at.localeCompare(second.created_at))
@@ -123,6 +156,8 @@ export async function GET(request: Request) {
       allEntries: entries ?? [],
       entryGames: games ?? [],
       entrySources: sources ?? [],
+      glossaryTags: glossaryTags ?? [],
+      entryTags: entryTags ?? [],
       authors: profiles ?? [],
     })
   } catch (error) {
@@ -166,6 +201,16 @@ export async function PATCH(request: Request) {
         return serverError('Statut invalide.', 400)
       }
 
+      if (body.status === 'published') {
+        const { count, error: tagsCountError } = await admin
+          .from('glossary_entry_tags')
+          .select('*', { count: 'exact', head: true })
+          .eq('glossary_entry_id', body.entryId)
+
+        if (tagsCountError) return serverError(tagsCountError.message)
+        if (!count) return serverError('Ajoute au moins un tag avant de publier cette entrée.', 400)
+      }
+
       const { data, error } = await admin
         .from('glossary_entries')
         .update({
@@ -206,6 +251,114 @@ export async function PATCH(request: Request) {
       })
     }
 
+    if (body.action === 'createGlossaryTag') {
+      const name = normalizeGlossaryTagName(typeof body.name === 'string' ? body.name : '')
+      const slug = slugify(name)
+
+      if (name.length < 2 || name.length > 30 || !slug || slug.length > 50) {
+        return serverError('Le nom du tag doit contenir entre 2 et 30 caractères.', 400)
+      }
+
+      const { data: existingTag, error: existingTagError } = await admin
+        .from('glossary_tags')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle()
+
+      if (existingTagError) {
+        return serverError(existingTagError.message)
+      }
+
+      if (existingTag) {
+        return serverError('Ce tag existe déjà.', 409)
+      }
+
+      const { data, error } = await admin
+        .from('glossary_tags')
+        .insert({ name, slug })
+        .select('id, slug, name')
+        .single()
+
+      if (error) {
+        return serverError(error.message)
+      }
+
+      return Response.json({ tag: data })
+    }
+
+    if (body.action === 'updateGlossaryEntryTags') {
+      if (typeof body.entryId !== 'string' || !body.entryId.trim()) {
+        return serverError('Publication invalide.', 400)
+      }
+
+      const { tagIds, error: tagSelectionError } = validateGlossaryTagIds(body.tagIds)
+
+      if (tagSelectionError) {
+        return serverError(tagSelectionError, 400)
+      }
+
+      const [{ data: entry, error: entryError }, { data: knownTags, error: knownTagsError }] =
+        await Promise.all([
+          admin.from('glossary_entries').select('id').eq('id', body.entryId).maybeSingle(),
+          admin.from('glossary_tags').select('id').in('id', tagIds),
+        ])
+
+      if (entryError) return serverError(entryError.message)
+      if (!entry) return serverError('Publication introuvable.', 404)
+      if (knownTagsError) return serverError(knownTagsError.message)
+      if ((knownTags ?? []).length !== tagIds.length) {
+        return serverError('Un ou plusieurs tags sont invalides.', 400)
+      }
+
+      const { data: currentRows, error: currentRowsError } = await admin
+        .from('glossary_entry_tags')
+        .select('tag_id')
+        .eq('glossary_entry_id', body.entryId)
+
+      if (currentRowsError) return serverError(currentRowsError.message)
+
+      const currentTagIds = (currentRows ?? []).map((row) => row.tag_id as string)
+      const addedTagIds = tagIds.filter((tagId) => !currentTagIds.includes(tagId))
+      const removedTagIds = currentTagIds.filter((tagId) => !tagIds.includes(tagId))
+
+      if (addedTagIds.length) {
+        const { error } = await admin.from('glossary_entry_tags').insert(
+          addedTagIds.map((tagId) => ({
+            glossary_entry_id: body.entryId,
+            tag_id: tagId,
+          })),
+        )
+
+        if (error) return serverError(error.message)
+      }
+
+      if (removedTagIds.length) {
+        const { error } = await admin
+          .from('glossary_entry_tags')
+          .delete()
+          .eq('glossary_entry_id', body.entryId)
+          .in('tag_id', removedTagIds)
+
+        if (error) {
+          if (addedTagIds.length) {
+            await admin
+              .from('glossary_entry_tags')
+              .delete()
+              .eq('glossary_entry_id', body.entryId)
+              .in('tag_id', addedTagIds)
+          }
+          return serverError(error.message)
+        }
+      }
+
+      return Response.json({
+        entryTags: tagIds.map((tagId) => ({
+          glossary_entry_id: body.entryId,
+          tag_id: tagId,
+        })),
+      })
+    }
+
     return serverError('Action admin inconnue.', 400)
   } catch (error) {
     return serverError(error instanceof Error ? error.message : 'Erreur admin inconnue.')
@@ -217,7 +370,31 @@ export async function DELETE(request: Request) {
     const auth = await requireAdmin(request)
     if (auth.error) return auth.error
 
-    const body = (await request.json()) as { entryId?: unknown }
+    const body = (await request.json()) as { entryId?: unknown; tagId?: unknown }
+
+    if (typeof body.tagId === 'string' && body.tagId.trim()) {
+      const { count, error: countError } = await auth.admin
+        .from('glossary_entry_tags')
+        .select('*', { count: 'exact', head: true })
+        .eq('tag_id', body.tagId)
+
+      if (countError) return serverError(countError.message)
+      if (count) {
+        return serverError('Ce tag est encore utilisé. Retire-le des entrées avant de le supprimer.', 409)
+      }
+
+      const { data, error } = await auth.admin
+        .from('glossary_tags')
+        .delete()
+        .eq('id', body.tagId)
+        .select('id, name')
+        .maybeSingle()
+
+      if (error) return serverError(error.message)
+      if (!data) return serverError('Tag introuvable.', 404)
+
+      return Response.json({ tag: data })
+    }
 
     if (typeof body.entryId !== 'string' || !body.entryId.trim()) {
       return serverError('Publication invalide.', 400)

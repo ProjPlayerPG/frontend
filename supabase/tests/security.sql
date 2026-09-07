@@ -30,6 +30,18 @@ begin
     raise exception 'service_role doit pouvoir supprimer un profil via la route serveur';
   end if;
 
+  if not has_table_privilege('anon', 'public.glossary_tags', 'SELECT') then
+    raise exception 'anon doit pouvoir lire les tags du glossaire';
+  end if;
+
+  if has_table_privilege('authenticated', 'public.glossary_tags', 'INSERT') then
+    raise exception 'authenticated ne doit pas créer directement des tags';
+  end if;
+
+  if not has_table_privilege('service_role', 'public.glossary_entry_tags', 'INSERT') then
+    raise exception 'service_role doit pouvoir associer les tags via la route serveur';
+  end if;
+
   if not has_table_privilege('authenticated', 'public.notifications', 'DELETE') then
     raise exception 'authenticated doit pouvoir supprimer ses propres notifications';
   end if;
@@ -57,11 +69,13 @@ begin
       'glossary_entries',
       'glossary_entry_games',
       'glossary_entry_sources',
+      'glossary_tags',
+      'glossary_entry_tags',
       'notifications'
     );
 
-  if public_policy_count <> 12 then
-    raise exception '12 policies publiques attendues, % trouvées', public_policy_count;
+  if public_policy_count <> 14 then
+    raise exception '14 policies publiques attendues, % trouvées', public_policy_count;
   end if;
 
   if exists (
@@ -77,6 +91,8 @@ begin
       'glossary_entries_reviewed_by_fkey',
       'glossary_entry_games_sort_order_check',
       'glossary_entry_sources_url_format',
+      'glossary_tags_slug_format',
+      'glossary_tags_name_length',
       'notifications_user_id_fkey'
     )
       and not convalidated

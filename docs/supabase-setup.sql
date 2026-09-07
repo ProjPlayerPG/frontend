@@ -50,6 +50,17 @@ create table if not exists public.glossary_entries (
   published_at timestamptz
 );
 
+create table if not exists public.glossary_tags (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  name text not null unique,
+  created_at timestamptz not null default now(),
+  constraint glossary_tags_slug_format
+    check (slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$' and char_length(slug) between 1 and 50),
+  constraint glossary_tags_name_length
+    check (char_length(btrim(name)) between 2 and 30)
+);
+
 create table if not exists public.glossary_entry_games (
   id uuid primary key default gen_random_uuid(),
   glossary_entry_id uuid not null
@@ -70,6 +81,15 @@ create table if not exists public.glossary_entry_sources (
   url text not null check (url ~* '^https://[^[:space:]]+$' and char_length(url) <= 2048),
   created_at timestamptz not null default now(),
   constraint glossary_entry_sources_unique unique (glossary_entry_id, url)
+);
+
+create table if not exists public.glossary_entry_tags (
+  glossary_entry_id uuid not null
+    references public.glossary_entries(id) on update cascade on delete cascade,
+  tag_id uuid not null
+    references public.glossary_tags(id) on update cascade on delete restrict,
+  created_at timestamptz not null default now(),
+  primary key (glossary_entry_id, tag_id)
 );
 
 create table if not exists public.notifications (
@@ -94,6 +114,8 @@ create index if not exists glossary_entry_games_entry_sort_idx
   on public.glossary_entry_games(glossary_entry_id, sort_order);
 create index if not exists glossary_entry_sources_entry_created_idx
   on public.glossary_entry_sources(glossary_entry_id, created_at);
+create index if not exists glossary_entry_tags_tag_entry_idx
+  on public.glossary_entry_tags(tag_id, glossary_entry_id);
 create index if not exists notifications_user_created_idx
   on public.notifications(user_id, created_at desc);
 
@@ -144,6 +166,8 @@ alter table public.game_translations enable row level security;
 alter table public.glossary_entries enable row level security;
 alter table public.glossary_entry_games enable row level security;
 alter table public.glossary_entry_sources enable row level security;
+alter table public.glossary_tags enable row level security;
+alter table public.glossary_entry_tags enable row level security;
 alter table public.notifications enable row level security;
 
 grant usage on schema public to anon, authenticated, service_role;
@@ -209,12 +233,18 @@ grant all on public.game_translations to service_role;
 revoke all on public.glossary_entries from anon, authenticated;
 revoke all on public.glossary_entry_games from anon, authenticated;
 revoke all on public.glossary_entry_sources from anon, authenticated;
+revoke all on public.glossary_tags from anon, authenticated;
+revoke all on public.glossary_entry_tags from anon, authenticated;
 grant select on public.glossary_entries to anon, authenticated;
 grant select on public.glossary_entry_games to anon, authenticated;
 grant select on public.glossary_entry_sources to anon, authenticated;
+grant select on public.glossary_tags to anon, authenticated;
+grant select on public.glossary_entry_tags to anon, authenticated;
 grant all on public.glossary_entries to service_role;
 grant all on public.glossary_entry_games to service_role;
 grant all on public.glossary_entry_sources to service_role;
+grant all on public.glossary_tags to service_role;
+grant all on public.glossary_entry_tags to service_role;
 
 drop policy if exists glossary_entries_select_published on public.glossary_entries;
 create policy glossary_entries_select_published
@@ -242,6 +272,34 @@ using (
       and glossary_entries.status = 'published'
   )
 );
+
+drop policy if exists glossary_tags_select_public on public.glossary_tags;
+create policy glossary_tags_select_public
+on public.glossary_tags for select to anon, authenticated
+using (true);
+
+drop policy if exists glossary_entry_tags_select_published on public.glossary_entry_tags;
+create policy glossary_entry_tags_select_published
+on public.glossary_entry_tags for select to anon, authenticated
+using (
+  exists (
+    select 1 from public.glossary_entries
+    where glossary_entries.id = glossary_entry_tags.glossary_entry_id
+      and glossary_entries.status = 'published'
+  )
+);
+
+insert into public.glossary_tags (slug, name)
+values
+  ('combat', 'Combat'),
+  ('equipement', 'Équipement'),
+  ('exploration', 'Exploration'),
+  ('multijoueur', 'Multijoueur'),
+  ('narration', 'Narration'),
+  ('personnages', 'Personnages'),
+  ('progression', 'Progression'),
+  ('technique', 'Technique')
+on conflict (slug) do nothing;
 
 revoke all on public.notifications from anon, authenticated;
 grant select on public.notifications to authenticated;
