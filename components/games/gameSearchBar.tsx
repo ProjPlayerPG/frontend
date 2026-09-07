@@ -187,7 +187,7 @@ export default function GameSearchBar({
         </form>
       </div>
 
-      {loading && !compact ? <p className="mt-3 text-sm text-[var(--muted)]">Consultation du codex...</p> : null}
+      {loading && !compact ? <p className="mt-3 text-sm text-[var(--muted)]">Consultation du catalogue...</p> : null}
       {error && !compact ? <p className="mt-3 text-sm text-rose-300">Erreur : {error}</p> : null}
 
       {open ? (
@@ -225,7 +225,7 @@ export default function GameSearchBar({
                       />
                     ) : (
                       <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
-                        Codex
+                        Catalogue
                       </span>
                     )}
                   </div>

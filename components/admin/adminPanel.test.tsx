@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AdminPanel from '@/components/admin/adminPanel'
 
 const { getSessionMock } = vi.hoisted(() => ({
@@ -44,6 +44,11 @@ const publishedEntry = {
 }
 
 describe('AdminPanel', () => {
+  afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+  })
+
   beforeEach(() => {
     getSessionMock.mockResolvedValue({
       data: {
@@ -79,6 +84,13 @@ describe('AdminPanel', () => {
               label: 'Source officielle',
               url: 'https://example.com/source',
             },
+          ],
+          glossaryTags: [
+            { id: 'tag-combat', slug: 'combat', name: 'Combat' },
+          ],
+          entryTags: [
+            { glossary_entry_id: pendingEntry.id, tag_id: 'tag-combat' },
+            { glossary_entry_id: publishedEntry.id, tag_id: 'tag-combat' },
           ],
           authors: [profile],
         }),
@@ -137,5 +149,59 @@ describe('AdminPanel', () => {
         body: JSON.stringify({ entryId: publishedEntry.id }),
       }),
     )
+  })
+
+  it('permet de compléter les tags d’une proposition avant publication', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          profiles: [profile],
+          pendingEntries: [pendingEntry],
+          allEntries: [pendingEntry],
+          entryGames: [],
+          entrySources: [],
+          glossaryTags: [
+            { id: 'tag-combat', slug: 'combat', name: 'Combat' },
+            { id: 'tag-progression', slug: 'progression', name: 'Progression' },
+          ],
+          entryTags: [
+            { glossary_entry_id: pendingEntry.id, tag_id: 'tag-combat' },
+          ],
+          authors: [profile],
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          entryTags: [
+            { glossary_entry_id: pendingEntry.id, tag_id: 'tag-combat' },
+            { glossary_entry_id: pendingEntry.id, tag_id: 'tag-progression' },
+          ],
+        }),
+      )
+
+    vi.stubGlobal('fetch', fetchMock)
+    render(<AdminPanel />)
+
+    expect(await screen.findByRole('heading', { name: 'Glossaire en attente' })).toBeInTheDocument()
+    const pendingArticle = screen.getAllByRole('heading', { name: 'Tactical RPG' })[0].closest('article')
+    expect(pendingArticle).not.toBeNull()
+
+    fireEvent.click(within(pendingArticle!).getByRole('button', { name: 'Examiner' }))
+    fireEvent.click(within(pendingArticle!).getByRole('button', { name: 'Progression' }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        '/api/admin',
+        expect.objectContaining({
+          method: 'PATCH',
+          body: JSON.stringify({
+            action: 'updateGlossaryEntryTags',
+            entryId: pendingEntry.id,
+            tagIds: ['tag-combat', 'tag-progression'],
+          }),
+        }),
+      )
+    })
   })
 })

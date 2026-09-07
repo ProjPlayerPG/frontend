@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import GlossaryIndex from '@/components/glossary/glossaryIndex'
 import { createSupabaseAdminClient } from '@/lib/server/supabaseAdmin'
+import { getGlossaryTagsByEntryId } from '@/lib/server/glossaryTags'
+import type { GlossaryTag } from '@/lib/glossaryTags'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,6 +11,7 @@ type GlossaryEntry = {
   slug: string
   title: string
   short_description: string
+  tags: GlossaryTag[]
 }
 
 async function getPublishedEntries() {
@@ -23,10 +26,24 @@ async function getPublishedEntries() {
     throw new Error(error.message)
   }
 
-  return (data ?? []) as GlossaryEntry[]
+  const entries = (data ?? []) as Omit<GlossaryEntry, 'tags'>[]
+  const tagsByEntryId = await getGlossaryTagsByEntryId(admin, entries.map((entry) => entry.id))
+
+  return entries.map((entry) => ({
+    ...entry,
+    tags: tagsByEntryId.get(entry.id) ?? [],
+  }))
 }
 
-export default async function GlossairePage() {
+export default async function GlossairePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tag?: string | string[] }>
+}) {
+  const resolvedSearchParams = await searchParams
+  const initialTag = Array.isArray(resolvedSearchParams.tag)
+    ? resolvedSearchParams.tag[0] ?? ''
+    : resolvedSearchParams.tag ?? ''
   const entries = await getPublishedEntries()
 
   return (
@@ -54,7 +71,7 @@ export default async function GlossairePage() {
       </section>
 
       {entries.length ? (
-        <GlossaryIndex entries={entries} />
+        <GlossaryIndex entries={entries} initialTag={initialTag} />
       ) : (
         <section className="panel rounded-[1.5rem] p-6">
           <h2 className="font-display text-3xl text-[var(--foreground)]">Aucune entrée publiée</h2>
