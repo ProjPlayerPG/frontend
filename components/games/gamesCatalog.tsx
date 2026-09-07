@@ -37,6 +37,7 @@ async function fetchGames(filters: GamesFilters) {
   } else {
     url.searchParams.set('sort', filters.sort)
     if (filters.tag) url.searchParams.set('tag', filters.tag)
+    if (filters.tagId) url.searchParams.set('tagId', filters.tagId)
     if (filters.platform) url.searchParams.set('platform', filters.platform)
     if (filters.platformId) url.searchParams.set('platformId', filters.platformId)
     if (filters.companyId) url.searchParams.set('companyId', filters.companyId)
@@ -59,6 +60,7 @@ async function fetchGamesCount(filters: GamesFilters) {
     url.searchParams.set('q', filters.query)
   } else {
     if (filters.tag) url.searchParams.set('tag', filters.tag)
+    if (filters.tagId) url.searchParams.set('tagId', filters.tagId)
     if (filters.platform) url.searchParams.set('platform', filters.platform)
     if (filters.platformId) url.searchParams.set('platformId', filters.platformId)
     if (filters.companyId) url.searchParams.set('companyId', filters.companyId)
@@ -96,7 +98,9 @@ export default async function GamesCatalog({
     ? `Jeux ${filters.companyRole === 'publisher' ? 'édités' : 'développés'} par ${filters.companyName || 'ce studio'}`
     : filters.platformId
       ? `Jeux disponibles sur ${filters.platformName || 'cette plateforme'}`
-      : ''
+      : filters.tagId
+        ? `Jeux associés au genre ${filters.tag || 'sélectionné'}`
+        : ''
 
   return (
     <div className="grid gap-5">

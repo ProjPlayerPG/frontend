@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   filtersFromSearchParams,
   gameDetailsHref,
+  gamesByGenreHref,
   gamesByCompanyHref,
   gamesByPlatformHref,
   gameSearchHref,
@@ -96,12 +97,35 @@ describe('navigation de recherche', () => {
 
 describe('navigation entre le catalogue et une fiche', () => {
   it('construit les filtres depuis les métadonnées cliquables d’un jeu', () => {
+    expect(gamesByGenreHref({ id: 12, name: 'Role-playing (RPG)' })).toBe(
+      '/games?tagId=12&tag=Role-playing+%28RPG%29',
+    )
     expect(gamesByPlatformHref({ id: 48, name: 'PlayStation 4' })).toBe(
       '/games?platformId=48&platformName=PlayStation+4',
     )
     expect(gamesByCompanyHref({ id: 101, name: 'FromSoftware' }, 'developer')).toBe(
       '/games?companyId=101&companyName=FromSoftware&companyRole=developer',
     )
+  })
+
+  it('conserve un genre IGDB dynamique dans le catalogue', () => {
+    const filters = filtersFromSearchParams({
+      tagId: '25',
+      tag: 'Hack and slash/Beat em up',
+    })
+
+    expect(filters).toMatchObject({
+      tagId: '25',
+      tag: 'Hack and slash/Beat em up',
+    })
+    expect(gamesCatalogHref(filters)).toBe(
+      '/games?tag=Hack+and+slash%2FBeat+em+up&tagId=25',
+    )
+  })
+
+  it('refuse un identifiant de genre invalide', () => {
+    expect(gamesByGenreHref({ id: 0, name: 'Invalide' })).toBe('/games')
+    expect(filtersFromSearchParams({ tagId: '../12', tag: 'RPG' }).tagId).toBeUndefined()
   })
 
   it('conserve un filtre de studio dans le lien de retour', () => {

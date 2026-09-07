@@ -27,6 +27,7 @@ export default function GamesCatalogControls({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const hasDynamicTag = Boolean(filters.tagId && filters.tag && !tagFilters.includes(filters.tag))
 
   const navigate = (updates: Partial<GamesFilters>) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -45,6 +46,12 @@ export default function GamesCatalogControls({
         params.delete(key)
       }
     })
+
+    if (nextFilters.tagId) {
+      params.set('tagId', nextFilters.tagId)
+    } else {
+      params.delete('tagId')
+    }
 
     if (nextFilters.sort !== 'release_desc') {
       params.set('sort', nextFilters.sort)
@@ -73,10 +80,11 @@ export default function GamesCatalogControls({
             <select
               name="tag"
               value={filters.tag}
-              onChange={(event) => navigate({ tag: event.target.value, page: 0 })}
+              onChange={(event) => navigate({ tag: event.target.value, tagId: undefined, page: 0 })}
               className="h-12 w-full appearance-none rounded-full border border-[var(--line)] bg-[var(--surface-strong)] py-0 pl-4 pr-12 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--line-strong)]"
             >
               <option value="">Tous les tags</option>
+              {hasDynamicTag ? <option value={filters.tag}>{filters.tag}</option> : null}
               {tagFilters.map((tag) => (
                 <option key={tag} value={tag}>
                   {tag}

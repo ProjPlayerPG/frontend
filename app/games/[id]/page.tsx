@@ -11,6 +11,7 @@ import GameProvenanceBadge, {
 } from '@/components/games/gameProvenanceBadge'
 import {
   gameDetailsHref,
+  gamesByGenreHref,
   gamesByCompanyHref,
   gamesByPlatformHref,
   normalizeGamesReturnTo,
@@ -263,12 +264,13 @@ export default async function GameDetails({
 
             <div className="mt-6 flex flex-wrap gap-3">
               {game.genres?.map((genre) => (
-                <span
+                <Link
                   key={genre.id}
-                  className="rounded-full border border-[var(--line)] bg-white/6 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[var(--muted)]"
+                  href={gamesByGenreHref(genre)}
+                  className="rounded-full border border-[var(--line)] bg-white/6 px-4 py-2 text-xs uppercase tracking-[0.22em] text-[var(--muted)] transition hover:border-[var(--line-strong)] hover:bg-white/10 hover:text-[var(--foreground)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                 >
                   {genre.name}
-                </span>
+                </Link>
               ))}
             </div>
 
