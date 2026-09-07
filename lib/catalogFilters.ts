@@ -4,6 +4,7 @@ export type GamesFilters = {
   page: number
   query: string
   tag: string
+  tagId?: string
   platform: string
   platformId?: string
   platformName?: string
@@ -42,8 +43,8 @@ function pageFromSearchParams(value: SearchParamValue) {
   return Number.isInteger(page) && page > 0 ? page - 1 : 0
 }
 
-function positiveId(value: SearchParamValue | string) {
-  const id = Number(firstValue(value))
+function positiveId(value: SearchParamValue | number) {
+  const id = Number(typeof value === 'number' ? value : firstValue(value))
   return Number.isInteger(id) && id > 0 ? String(id) : ''
 }
 
@@ -78,6 +79,7 @@ export function gamesCatalogHref(filters: GamesFilters) {
     params.set('q', filters.query)
   } else {
     if (filters.tag) params.set('tag', filters.tag)
+    if (filters.tagId) params.set('tagId', filters.tagId)
     if (filters.platform) params.set('platform', filters.platform)
     if (filters.platformId) {
       params.set('platformId', filters.platformId)
@@ -97,6 +99,16 @@ export function gamesCatalogHref(filters: GamesFilters) {
   }
 
   return `/games${params.size ? `?${params.toString()}` : ''}`
+}
+
+export function gamesByGenreHref(genre: { id: number; name: string }) {
+  const id = positiveId(genre.id)
+  const name = entityName(genre.name)
+
+  if (!id || !name) return '/games'
+
+  const params = new URLSearchParams({ tagId: id, tag: name })
+  return `/games?${params.toString()}`
 }
 
 export function gamesByPlatformHref(platform: { id: number; name: string }) {
@@ -193,13 +205,15 @@ export function gameDetailsHref(
 
 export function filtersFromSearchParams(searchParams: GamesSearchParams = {}): GamesFilters {
   const query = normalizeGameSearchQuery(searchParams.q)
+  const selectedTagId = positiveId(searchParams.tagId)
   const selectedPlatformId = positiveId(searchParams.platformId)
   const selectedCompanyId = positiveId(searchParams.companyId)
 
   return {
     page: pageFromSearchParams(searchParams.page),
     query: query.length >= 2 ? query : '',
-    tag: allowedValue(searchParams.tag, tagFilters),
+    tag: selectedTagId ? entityName(searchParams.tag) : allowedValue(searchParams.tag, tagFilters),
+    ...(selectedTagId ? { tagId: selectedTagId } : {}),
     platform: selectedPlatformId ? '' : allowedValue(searchParams.platform, platformFilters),
     ...(selectedPlatformId
       ? {
