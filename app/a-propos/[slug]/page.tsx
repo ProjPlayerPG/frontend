@@ -107,6 +107,11 @@ function GuideRpgPage() {
           PlayerPG indique clairement quand une recommandation est produite avec une IA. Cette transparence s&apos;inscrit dans l&apos;esprit du règlement européen sur l&apos;IA, sans transformer cette page en texte juridique.
         </p>
       </aside>
+
+      <Link href="/chatbot" className="about-primary-link">
+        Essayer le guide RPG
+        <span aria-hidden="true">→</span>
+      </Link>
     </AboutPageShell>
   )
 }

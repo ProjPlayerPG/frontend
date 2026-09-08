@@ -130,7 +130,7 @@ export default async function GameDetails({
     })
   const baseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_GAME_SERVICE_URL)
   const url = `${baseUrl}/api/games/${id}`
-  const res = await fetch(url, { cache: 'no-store' })
+  const res = await fetch(url, { next: { revalidate: 3600 } })
 
   if (!res.ok) {
     return (

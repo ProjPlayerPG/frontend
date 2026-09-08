@@ -43,9 +43,10 @@ async function fetchGames(filters: GamesFilters) {
     if (filters.companyId) url.searchParams.set('companyId', filters.companyId)
     if (filters.companyRole) url.searchParams.set('companyRole', filters.companyRole)
     if (filters.releaseYear) url.searchParams.set('releaseYear', filters.releaseYear)
+    if (filters.content) url.searchParams.set('content', filters.content)
   }
 
-  const res = await fetch(url.toString(), { cache: 'no-store' })
+  const res = await fetch(url.toString(), { next: { revalidate: 300 } })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
   const data = await res.json()
@@ -66,9 +67,11 @@ async function fetchGamesCount(filters: GamesFilters) {
     if (filters.companyId) url.searchParams.set('companyId', filters.companyId)
     if (filters.companyRole) url.searchParams.set('companyRole', filters.companyRole)
     if (filters.releaseYear) url.searchParams.set('releaseYear', filters.releaseYear)
+    if (filters.content) url.searchParams.set('content', filters.content)
+    url.searchParams.set('sort', filters.sort)
   }
 
-  const res = await fetch(url.toString(), { cache: 'no-store' })
+  const res = await fetch(url.toString(), { next: { revalidate: 300 } })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
   const data = (await res.json()) as { total?: number }
@@ -149,8 +152,8 @@ export default async function GamesCatalog({
         </div>
       )}
 
-      {games.map((game) => (
-        <GameCard key={game.id} game={game} returnTo={returnTo} />
+      {games.map((game, index) => (
+        <GameCard key={game.id} game={game} returnTo={returnTo} priority={index === 0} />
       ))}
 
       {games.length > 0 ? (

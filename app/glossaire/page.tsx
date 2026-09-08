@@ -54,19 +54,23 @@ export default async function GlossairePage({
           <h1 className="font-display text-5xl font-semibold leading-none text-[var(--foreground)]">
             Les mots du RPG
           </h1>
-          <Link
-            href="/glossaire/proposer"
-            className="inline-flex w-fit rounded-full border border-[var(--accent-strong)] bg-[var(--accent)] px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-[var(--background-deep)] transition hover:bg-[var(--accent-strong)]"
-          >
-            Proposer un terme
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/a-propos/glossaire"
+              className="inline-flex w-fit rounded-full border border-[var(--line-strong)] bg-white/6 px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:bg-[var(--accent)]/12"
+            >
+              Comment fonctionne le glossaire ?
+            </Link>
+            <Link
+              href="/glossaire/proposer"
+              className="inline-flex w-fit rounded-full border border-[var(--accent-strong)] bg-[var(--accent)] px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-[var(--background-deep)] transition hover:bg-[var(--accent-strong)]"
+            >
+              Proposer un terme
+            </Link>
+          </div>
         </div>
         <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-          Des définitions courtes, des exemples et des contributions relues avant publication.{' '}
-          <Link href="/a-propos/glossaire" className="text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--accent-strong)]">
-            Découvrir comment le glossaire fonctionne
-          </Link>
-          .
+          Des définitions courtes, des exemples et des contributions relues avant publication.
         </p>
       </section>
 

@@ -23,9 +23,11 @@ function formatReleaseYear(timestamp?: number) {
 export default function GameCard({
   game,
   returnTo,
+  priority = false,
 }: {
   game: Game
   returnTo?: string
+  priority?: boolean
 }) {
   const coverUrl = igdbUrlWithSize(game.cover?.url, 't_cover_big')
   const releaseYear = formatReleaseYear(game.first_release_date)
@@ -42,6 +44,7 @@ export default function GameCard({
             src={coverUrl}
             alt={game.name}
             fill
+            loading={priority ? 'eager' : 'lazy'}
             sizes="(max-width: 640px) calc(100vw - 2rem), 112px"
             className="object-cover transition duration-500 group-hover:scale-[1.03]"
           />
