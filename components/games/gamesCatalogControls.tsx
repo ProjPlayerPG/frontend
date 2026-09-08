@@ -2,7 +2,13 @@
 
 import { FormEvent, useEffect, useId, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { platformFilters, releaseYearFilters, sortOptions, tagFilters } from '@/lib/gamesFilters'
+import {
+  contentFilters,
+  platformFilters,
+  releaseYearFilters,
+  sortOptions,
+  tagFilters,
+} from '@/lib/gamesFilters'
 import type { GamesFilters } from '@/lib/catalogFilters'
 
 function SelectShell({ children }: { children: React.ReactNode }) {
@@ -37,6 +43,7 @@ export default function GamesCatalogControls({
       ['tag', nextFilters.tag],
       ['platform', nextFilters.platform],
       ['releaseYear', nextFilters.releaseYear],
+      ['content', nextFilters.content],
     ]
 
     entries.forEach(([key, value]) => {
@@ -53,7 +60,7 @@ export default function GamesCatalogControls({
       params.delete('tagId')
     }
 
-    if (nextFilters.sort !== 'release_desc') {
+    if (nextFilters.sort !== 'quality') {
       params.set('sort', nextFilters.sort)
     } else {
       params.delete('sort')
@@ -73,7 +80,7 @@ export default function GamesCatalogControls({
   }
 
   return (
-    <div className="panel grid gap-4 rounded-[1.5rem] p-4 md:grid-cols-2 xl:grid-cols-[1fr,1fr,1fr,1fr,auto] xl:items-end">
+    <div className="panel grid gap-4 rounded-[1.5rem] p-4 md:grid-cols-2 xl:grid-cols-[repeat(5,minmax(0,1fr))_auto] xl:items-end">
         <label className="grid gap-2">
           <span className="text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">Tags</span>
           <SelectShell>
@@ -88,6 +95,24 @@ export default function GamesCatalogControls({
               {tagFilters.map((tag) => (
                 <option key={tag} value={tag}>
                   {tag}
+                </option>
+              ))}
+            </select>
+          </SelectShell>
+        </label>
+
+        <label className="grid gap-2">
+          <span className="text-xs uppercase tracking-[0.24em] text-[var(--accent-cool)]">Contenu</span>
+          <SelectShell>
+            <select
+              name="content"
+              value={filters.content}
+              onChange={(event) => navigate({ content: event.target.value, page: 0 })}
+              className="h-12 w-full appearance-none rounded-full border border-[var(--line)] bg-[var(--surface-strong)] py-0 pl-4 pr-12 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--line-strong)]"
+            >
+              {contentFilters.map((option) => (
+                <option key={option.value || 'all'} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -153,7 +178,7 @@ export default function GamesCatalogControls({
         <button
           type="button"
           onClick={resetFilters}
-          className="h-12 rounded-full border border-[var(--line)] px-5 text-sm uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-white/7 hover:text-[var(--foreground)] md:col-span-2 md:mx-auto md:w-full md:max-w-lg xl:col-span-4"
+          className="h-12 rounded-full border border-[var(--line)] px-5 text-sm uppercase tracking-[0.18em] text-[var(--muted)] transition hover:bg-white/7 hover:text-[var(--foreground)] md:col-span-2 md:mx-auto md:w-full md:max-w-lg xl:col-span-1 xl:mx-0"
         >
           Réinitialiser
         </button>

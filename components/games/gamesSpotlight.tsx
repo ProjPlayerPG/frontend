@@ -31,7 +31,7 @@ async function fetchSpotlightGames() {
   url.searchParams.set('mode', 'recent')
   url.searchParams.set('limit', '6')
 
-  const res = await fetch(url.toString(), { cache: 'no-store' })
+  const res = await fetch(url.toString(), { next: { revalidate: 300 } })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
   const data = await res.json()
