@@ -60,11 +60,7 @@ export default function GamesCatalogControls({
       params.delete('tagId')
     }
 
-    if (nextFilters.sort !== 'quality') {
-      params.set('sort', nextFilters.sort)
-    } else {
-      params.delete('sort')
-    }
+    params.set('sort', nextFilters.sort)
 
     if (nextFilters.page > 0) {
       params.set('page', String(nextFilters.page + 1))
@@ -76,7 +72,7 @@ export default function GamesCatalogControls({
   }
 
   const resetFilters = () => {
-    router.replace(pathname, { scroll: false })
+    router.replace(`${pathname}?sort=quality`, { scroll: false })
   }
 
   return (
