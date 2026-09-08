@@ -124,7 +124,7 @@ describe('navigation entre le catalogue et une fiche', () => {
       tag: 'Hack and slash/Beat em up',
     })
     expect(gamesCatalogHref(filters)).toBe(
-      '/games?tag=Hack+and+slash%2FBeat+em+up&tagId=25',
+      '/games?tag=Hack+and+slash%2FBeat+em+up&tagId=25&sort=quality',
     )
   })
 
@@ -141,7 +141,7 @@ describe('navigation entre le catalogue et une fiche', () => {
     })
 
     expect(gamesCatalogHref(filters)).toBe(
-      '/games?companyId=101&companyName=FromSoftware&companyRole=developer',
+      '/games?companyId=101&companyName=FromSoftware&companyRole=developer&sort=quality',
     )
   })
 

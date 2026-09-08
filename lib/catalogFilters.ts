@@ -99,7 +99,7 @@ export function gamesCatalogHref(filters: GamesFilters) {
     }
     if (filters.releaseYear) params.set('releaseYear', filters.releaseYear)
     if (filters.content) params.set('content', filters.content)
-    if (filters.sort !== 'quality') params.set('sort', filters.sort)
+    params.set('sort', filters.sort)
   }
 
   if (filters.page > 0) {
