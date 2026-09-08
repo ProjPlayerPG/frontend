@@ -52,6 +52,12 @@ export default function Home() {
             >
               Explorer les jeux
             </Link>
+            <Link
+              href="/a-propos"
+              className="inline-flex min-h-13 items-center justify-center rounded-full border border-[var(--line-strong)] bg-white/6 px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[var(--foreground)] transition hover:-translate-y-0.5 hover:bg-white/10"
+            >
+              Qu&apos;est-ce que PlayerPG ?
+            </Link>
             <RandomRpgButton />
           </div>
         </div>

@@ -28,7 +28,7 @@ export default function GameProvenanceBadge({
   provenance?: GameProvenance
   compact?: boolean
 }) {
-  if (!provenance) return null
+  if (!provenance || provenance === 'unverified') return null
 
   const presentation = provenancePresentation[provenance]
 

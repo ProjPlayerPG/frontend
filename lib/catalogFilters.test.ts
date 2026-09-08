@@ -20,7 +20,8 @@ describe('filtersFromSearchParams', () => {
       tag: '',
       platform: '',
       releaseYear: '',
-      sort: 'release_desc',
+      content: '',
+      sort: 'quality',
     })
   })
 
@@ -43,6 +44,7 @@ describe('filtersFromSearchParams', () => {
         tag: 'Tactical',
         platform: 'Nintendo Switch',
         releaseYear: '2024',
+        content: 'community',
         sort: 'name_asc',
       }),
     ).toEqual({
@@ -51,6 +53,7 @@ describe('filtersFromSearchParams', () => {
       tag: 'Tactical',
       platform: 'Nintendo Switch',
       releaseYear: '2024',
+      content: 'community',
       sort: 'name_asc',
     })
   })
@@ -61,6 +64,7 @@ describe('filtersFromSearchParams', () => {
         tag: 'Course',
         platform: 'Dreamcast',
         releaseYear: '1989',
+        content: 'promotionnel',
         sort: 'popularite',
       }),
     ).toEqual({
@@ -69,7 +73,8 @@ describe('filtersFromSearchParams', () => {
       tag: '',
       platform: '',
       releaseYear: '',
-      sort: 'release_desc',
+      content: '',
+      sort: 'quality',
     })
   })
 
@@ -158,12 +163,13 @@ describe('navigation entre le catalogue et une fiche', () => {
           tag: 'Strategy',
           platform: 'Nintendo Switch',
           releaseYear: '2024',
+          content: 'community',
           sort: 'name_asc',
           page: '2',
         }),
       ),
     ).toBe(
-      '/games?tag=Strategy&platform=Nintendo+Switch&releaseYear=2024&sort=name_asc&page=2',
+      '/games?tag=Strategy&platform=Nintendo+Switch&releaseYear=2024&content=community&sort=name_asc&page=2',
     )
   })
 

@@ -21,7 +21,8 @@ const filters = {
   tag: '',
   platform: '',
   releaseYear: '',
-  sort: 'release_desc',
+  content: '',
+  sort: 'quality',
 }
 
 describe('GamesPagination', () => {

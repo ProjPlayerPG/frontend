@@ -83,7 +83,7 @@ export default function RpgChatbot() {
 
   return (
     <section className="relative z-0 mt-10">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--accent-cool)]">
             Guide RPG
@@ -92,9 +92,17 @@ export default function RpgChatbot() {
             Trouver ta prochaine aventure
           </h2>
         </div>
-        <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">
-          Décris ton envie, PlayerPG propose des RPG adaptés.
-        </p>
+        <div className="flex flex-col items-start gap-3 sm:items-end">
+          <p className="hidden max-w-md text-right text-sm leading-6 text-[var(--muted)] md:block">
+            Décris ton envie, PlayerPG propose des RPG adaptés.
+          </p>
+          <Link
+            href="/a-propos/guide-rpg"
+            className="inline-flex rounded-full border border-[var(--line-strong)] bg-white/6 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--accent)] transition hover:bg-[var(--accent)]/12"
+          >
+            Comment fonctionne le guide ?
+          </Link>
+        </div>
       </div>
 
       <div className="panel mt-6 rounded-[1.5rem] p-5">

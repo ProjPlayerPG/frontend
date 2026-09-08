@@ -1,4 +1,10 @@
-import { platformFilters, releaseYearFilters, sortOptions, tagFilters } from '@/lib/gamesFilters'
+import {
+  contentFilters,
+  platformFilters,
+  releaseYearFilters,
+  sortOptions,
+  tagFilters,
+} from '@/lib/gamesFilters'
 
 export type GamesFilters = {
   page: number
@@ -12,6 +18,7 @@ export type GamesFilters = {
   companyName?: string
   companyRole?: 'developer' | 'publisher' | ''
   releaseYear: string
+  content: string
   sort: string
 }
 
@@ -35,7 +42,7 @@ function allowedValue(value: SearchParamValue, values: string[]) {
 function allowedSort(value: SearchParamValue) {
   const selected = firstValue(value)
   const sortValues = sortOptions.map((option) => option.value)
-  return selected && sortValues.includes(selected) ? selected : 'release_desc'
+  return selected && sortValues.includes(selected) ? selected : 'quality'
 }
 
 function pageFromSearchParams(value: SearchParamValue) {
@@ -91,7 +98,8 @@ export function gamesCatalogHref(filters: GamesFilters) {
       if (filters.companyRole) params.set('companyRole', filters.companyRole)
     }
     if (filters.releaseYear) params.set('releaseYear', filters.releaseYear)
-    if (filters.sort !== 'release_desc') params.set('sort', filters.sort)
+    if (filters.content) params.set('content', filters.content)
+    if (filters.sort !== 'quality') params.set('sort', filters.sort)
   }
 
   if (filters.page > 0) {
@@ -229,6 +237,10 @@ export function filtersFromSearchParams(searchParams: GamesSearchParams = {}): G
         }
       : {}),
     releaseYear: allowedValue(searchParams.releaseYear, releaseYearFilters),
+    content: allowedValue(
+      searchParams.content,
+      contentFilters.map((option) => option.value).filter(Boolean),
+    ),
     sort: allowedSort(searchParams.sort),
   }
 }
